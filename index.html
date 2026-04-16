@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Agenda do Professor</title>
+    <title>Agenda do Professor - MARS</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -34,13 +34,13 @@
         .nav-icon:hover { color: #fff; background: rgba(255,255,255,0.08); transform: translateY(-2px); }
         .nav-icon.active { color: var(--brand-red); background: rgba(194,0,0,0.15); border-color: rgba(194,0,0,0.3); }
         
-        .card-agenda {
+        .card-agenda, .card-dispo {
             background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,255,255,0.05);
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        .card-agenda:hover { background: rgba(255,255,255,0.04); border-color: rgba(194,0,0,0.3); transform: translateX(5px); }
+        .card-agenda:hover, .card-dispo:hover { background: rgba(255,255,255,0.04); border-color: rgba(194,0,0,0.3); transform: translateX(5px); }
         
         .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
         .spinner-white { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
@@ -60,13 +60,14 @@
             border-radius: 50px;
             opacity: 0;
             transition: all 0.3s ease;
-            z-index: 10000;
+            z-index: 10002;
             font-size: 12px;
             white-space: nowrap;
         }
         .toast.show { opacity: 1; bottom: 40px; }
         .toast.error { border-color: #ff4444; }
         .toast.success { border-color: #00c851; }
+        .toast.info { border-color: #3b82f6; }
         
         .modal {
             position: fixed;
@@ -95,48 +96,42 @@
         }
         
         input, select, textarea {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 0.4rem 0.6rem;
-    color: white;
-    font-size: 0.7rem;
-    width: 100%;
-    transition: all 0.2s ease;
-}
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.4rem 0.6rem;
+            color: white;
+            font-size: 0.7rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
 
-select {
-    background: rgba(15,15,15,0.95);
-    color: white;
-    cursor: pointer;
-}
+        select {
+            background: rgba(15,15,15,0.95);
+            color: white;
+            cursor: pointer;
+        }
 
-select option {
-    background: #1a1a1a;
-    color: white;
-    padding: 8px;
-}
+        select option {
+            background: #1a1a1a;
+            color: white;
+            padding: 8px;
+        }
 
-select option:hover {
-    background: var(--brand-red);
-}
+        input:focus, select:focus, textarea:focus { 
+            outline: none; 
+            border-color: var(--brand-red); 
+            background: rgba(255,255,255,0.08); 
+        }
 
-input:focus, select:focus, textarea:focus { 
-    outline: none; 
-    border-color: var(--brand-red); 
-    background: rgba(255,255,255,0.08); 
-}
-
-label { 
-    font-size: 0.55rem; 
-    text-transform: uppercase; 
-    letter-spacing: 0.1em; 
-    color: #888; 
-    margin-bottom: 0.15rem; 
-    display: block; 
-}
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand-red); background: rgba(255,255,255,0.08); }
-        label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 0.15rem; display: block; }
+        label { 
+            font-size: 0.55rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.1em; 
+            color: #888; 
+            margin-bottom: 0.15rem; 
+            display: block; 
+        }
         
         .view-section { display: none; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease; }
@@ -145,26 +140,79 @@ label {
         .notification-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--brand-red); border-radius: 50%; border: 2px solid #000; display: none; }
         .notification-dot.visible { display: block; }
         
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: transparent; }
-        .calendar-day { background: rgba(255,255,255,0.03); aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; position: relative; border-radius: 12px; }
+        .calendar-wrapper {
+            max-width: 280px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background: transparent;
+        }
+        .calendar-day {
+            background: rgba(255,255,255,0.03);
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border-radius: 8px;
+        }
         .calendar-day:hover:not(.empty) { background: rgba(194,0,0,0.2); color: var(--brand-red); }
         .calendar-day.active-day { background: rgba(194,0,0,0.3); color: var(--brand-red); font-weight: 700; }
         .calendar-day.today { color: var(--brand-red); font-weight: 800; border: 1px solid var(--brand-red); }
-        .calendar-day.has-event::after { content: ''; position: absolute; bottom: 6px; width: 5px; height: 5px; background: var(--brand-red); border-radius: 50%; }
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background: var(--brand-red);
+            border-radius: 50%;
+        }
         .calendar-day.empty { background: transparent; cursor: default; }
         .calendar-day.past { opacity: 0.3; cursor: not-allowed; }
         
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .calendar-nav button {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .calendar-nav button:hover { background: rgba(255,255,255,0.1); }
+        .calendar-nav span {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
         @media (max-width: 768px) {
             .calendar-grid { gap: 2px; }
-            .calendar-day { font-size: 12px; border-radius: 8px; }
+            .calendar-day { font-size: 11px; border-radius: 6px; }
             .desktop-layout { flex-direction: column; }
-            #pending-table thead { display: none; }
-            #pending-table tr { display: block; margin-bottom: 1rem; background: rgba(255,255,255,0.02); border-radius: 20px; padding: 1rem; }
-            #pending-table td { display: block; padding: 0.25rem 0; text-align: left !important; }
+            .calendar-wrapper { max-width: 100%; }
+            .responsive-table { overflow-x: auto; }
             .toast { white-space: normal; text-align: center; max-width: 90%; }
         }
         
-        @media (min-width: 769px) { .desktop-layout { display: flex; gap: 2rem; align-items: flex-start; } .calendar-wrapper { flex: 0 0 400px; } .events-panel { flex: 1; } }
+        @media (min-width: 769px) { 
+            .desktop-layout { display: flex; gap: 1.5rem; align-items: flex-start; } 
+            .calendar-wrapper { flex: 0 0 280px; } 
+            .events-panel { flex: 1; } 
+        }
         
         .btn-recusar {
             background: rgba(255,255,255,0.05);
@@ -204,6 +252,40 @@ label {
         .form-group { margin-bottom: 0.5rem; }
         
         h3 { font-size: 1rem; margin-bottom: 0.75rem; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .action-btn {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
+        .action-btn.cancel:hover { background: rgba(255,0,0,0.2); color: #ff4444; }
+        .action-btn.reschedule:hover { background: rgba(0,150,255,0.2); color: #3b82f6; }
+        .action-btn.delete:hover { background: rgba(255,0,0,0.2); color: #ff4444; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 0.75rem; font-size: 0.7rem; text-transform: uppercase; color: #888; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        td { padding: 0.75rem; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        tr:hover { background: rgba(255,255,255,0.02); }
+        
+        .weekday-tag {
+            display: inline-block;
+            background: rgba(194,0,0,0.15);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -214,16 +296,16 @@ label {
             <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#c20000] to-[#8b0000] flex items-center justify-center">
                 <i data-lucide="calendar" class="w-8 h-8 text-white"></i>
             </div>
-            <p class="text-[#c20000] text-[9px] tracking-[0.6em] uppercase mb-2 font-bold opacity-80">Agenda</p>
+            <p class="text-[#c20000] text-[9px] tracking-[0.6em] uppercase mb-2 font-bold opacity-80">MARS Agenda</p>
             <h2 class="text-white text-xl font-light">Hello, teacher!</h2>
         </div>
-        <div class="glass-panel p-1 rounded-2xl mb-4 flex items-center">
-            <input type="password" id="login-senha" placeholder="Digite sua senha" class="bg-transparent border-none text-white px-4 py-3 text-sm w-full focus:ring-0 outline-none">
-            <button id="login-btn" class="bg-[#c20000] text-white p-3 rounded-xl transition-all flex items-center justify-center min-w-[52px]">
+        <form onsubmit="event.preventDefault(); fazerLogin();" class="glass-panel p-1 rounded-2xl mb-4 flex items-center">
+            <input type="password" id="login-senha" placeholder="Digite seu pin" class="bg-transparent border-none text-white px-4 py-3 text-sm w-full focus:ring-0 outline-none">
+            <button type="submit" id="login-btn" class="bg-[#c20000] text-white p-3 rounded-xl transition-all flex items-center justify-center min-w-[52px]">
                 <i data-lucide="arrow-right" class="w-5 h-5"></i>
             </button>
-        </div>
-        <p class="text-[10px] text-zinc-500">Digite seu pin do windows</p>
+        </form>
+        <p class="text-[10px] text-zinc-500">Use seu pin de acesso do windows</p>
     </div>
 </div>
 
@@ -241,6 +323,7 @@ label {
             <nav class="glass-panel p-1 rounded-2xl flex items-center gap-1">
                 <div class="nav-icon active" data-view="home"><i data-lucide="home" class="w-4 h-4 md:w-5 md:h-5"></i></div>
                 <div class="nav-icon" data-view="calendar"><i data-lucide="calendar" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                <div class="nav-icon" data-view="disponibilidade"><i data-lucide="clock" class="w-4 h-4 md:w-5 md:h-5"></i></div>
                 <div class="nav-icon" data-view="messages"><i data-lucide="message-square" class="w-4 h-4 md:w-5 md:h-5"></i><div class="notification-dot" id="pending-dot"></div></div>
             </nav>
         </div>
@@ -258,31 +341,54 @@ label {
         <h2 class="text-lg md:text-xl font-light mb-6 md:mb-8">Meu <span class="text-[#c20000]">Calendário</span></h2>
         <div class="desktop-layout">
             <div class="calendar-wrapper">
-                <div class="flex items-center justify-between mb-4">
-                    <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                    <span id="calendar-month-year" class="text-sm md:text-base font-medium"></span>
-                    <button onclick="changeMonth(1)" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                <div class="calendar-nav">
+                    <button onclick="changeMonth(-1)"><i data-lucide="chevron-left" class="w-3 h-3"></i></button>
+                    <span id="calendar-month-year"></span>
+                    <button onclick="changeMonth(1)"><i data-lucide="chevron-right" class="w-3 h-3"></i></button>
                 </div>
                 <div class="calendar-grid" id="calendar-body">
-                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">DOM</div>
-                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">SEG</div>
-                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">TER</div>
-                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">QUA</div>
-                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">QUI</div>
-                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">SEX</div>
-                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">SÁB</div>
+                    <div class="calendar-day empty text-[9px] text-zinc-600 font-bold">D</div>
+                    <div class="calendar-day empty text-[9px] text-zinc-600 font-bold">S</div>
+                    <div class="calendar-day empty text-[9px] text-zinc-600 font-bold">T</div>
+                    <div class="calendar-day empty text-[9px] text-zinc-600 font-bold">Q</div>
+                    <div class="calendar-day empty text-[9px] text-zinc-600 font-bold">Q</div>
+                    <div class="calendar-day empty text-[9px] text-zinc-600 font-bold">S</div>
+                    <div class="calendar-day empty text-[9px] text-zinc-600 font-bold">S</div>
                 </div>
             </div>
             <div class="events-panel glass-panel rounded-2xl md:rounded-3xl p-5 md:p-6">
-                <h3 class="text-base md:text-lg font-light mb-3 md:mb-4" id="selected-date-title">Selecione uma data</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-base md:text-lg font-light" id="selected-date-title">Selecione uma data</h3>
+                    <button onclick="openAddAgendaModal()" class="bg-[#c20000] text-white text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-xl font-bold transition-all hover:scale-105 flex items-center gap-1">
+                        <i data-lucide="plus" class="w-3 h-3"></i> Novo
+                    </button>
+                </div>
                 <div id="selected-day-agenda" class="space-y-2 md:space-y-3"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-disponibilidade" class="view-section">
+        <div class="flex items-center justify-between mb-6 md:mb-8">
+            <h2 class="text-lg md:text-xl font-light">Disponibilidade <span class="text-[#c20000]">de Horários</span></h2>
+            <button onclick="openAddDispoModal()" class="bg-[#c20000] text-white text-[10px] uppercase tracking-widest px-4 py-2 rounded-xl font-bold transition-all hover:scale-105 flex items-center gap-2">
+                <i data-lucide="plus" class="w-3 h-3"></i> Novo Range
+            </button>
+        </div>
+        <div class="glass-panel rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr><th>Dia da Semana</th><th>Horário Inicial</th><th>Horário Final</th><th style="width: 80px">Ações</th></tr>
+                    </thead>
+                    <tbody id="dispo-list"></tbody>
+                </table>
             </div>
         </div>
     </section>
 
     <section id="view-messages" class="view-section">
         <h2 class="text-lg md:text-xl font-light mb-6 md:mb-8">Solicitações <span class="text-[#c20000]">Pendentes</span></h2>
-        
         <div id="solicitacoes-list" class="glass-panel rounded-2xl md:rounded-3xl overflow-hidden">
             <table class="w-full text-left" id="pending-table">
                 <thead class="text-[9px] md:text-[10px] text-zinc-500 uppercase border-b border-white/5">
@@ -291,7 +397,6 @@ label {
                 <tbody id="pending-list"></tbody>
             </table>
         </div>
-        
         <div id="pagina-recusa" class="glass-panel rounded-2xl md:rounded-3xl p-5 md:p-6" style="display: none;">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-lg md:text-xl font-light">Recusar <span class="text-[#c20000]">Solicitação</span></h2>
@@ -312,57 +417,60 @@ label {
 </div>
 
 <script>
-    var API_URL = 'https://script.google.com/macros/s/AKfycbyQhIwtvmFIjvij-ZwbknM35sj4InU3Bvd_Bi5F4b5YBuankHLk1HDZED-wXh3Kfu_y/exec';
+    var API_URL = 'https://script.google.com/macros/s/AKfycbwzu-JhEGCmwC0aj2iWcvaWZx19i9GABgnbVwLnwm9RKyiAHCOH_4pLtDX2IRRQ-IcLcg/exec';
     var currentProfessor = null;
     var agendaData = [];
+    var cancelData = [];
     var solicitData = [];
+    var dispoData = [];
     var currentDate = new Date();
     var selectedDate = new Date().toISOString().split('T')[0];
     var weekDays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
     var monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     var solicitacaoSelecionada = null;
 
+    function removerAspaExibicao(str) {
+        if (!str) return '';
+        if (typeof str === 'string' && str.startsWith("'")) {
+            return str.substring(1);
+        }
+        return str;
+    }
+
     function formatarHorario(horario) {
         if (!horario) return '--:--';
-        if (typeof horario === 'string' && horario.match(/^\d{2}:\d{2}$/)) return horario;
-        if (typeof horario === 'string' && horario.includes('T')) {
-            var hora = horario.substring(11, 13);
-            var minuto = horario.substring(14, 16);
-            if (hora && minuto) return hora + ':' + minuto;
-        }
-        if (typeof horario === 'string' && horario.match(/^\d{2}:\d{2}:\d{2}/)) {
-            return horario.substring(0, 5);
-        }
-        return horario;
+        var horarioLimpo = removerAspaExibicao(horario);
+        return horarioLimpo;
     }
 
     function formatarData(dataStr) {
         if (!dataStr) return '';
-        if (dataStr.includes('/')) return dataStr;
-        var partes = dataStr.split('-');
+        var dataLimpa = removerAspaExibicao(dataStr);
+        if (dataLimpa.includes('/')) return dataLimpa;
+        var partes = dataLimpa.split('-');
         if (partes.length === 3) return partes[2] + '/' + partes[1] + '/' + partes[0];
-        return dataStr;
+        return dataLimpa;
     }
     
     function isDataString(str) {
         if (!str) return false;
+        var strLimpa = removerAspaExibicao(str);
         var regexData = /^\d{2}\/\d{2}\/\d{4}$/;
-        return regexData.test(str);
+        return regexData.test(strLimpa);
     }
     
     function converterDataParaISO(dataStr) {
         if (!dataStr) return null;
-        var partes = dataStr.split('/');
-        if (partes.length === 3) {
-            return partes[2] + '-' + partes[1] + '-' + partes[0];
-        }
-        return dataStr;
+        var dataLimpa = removerAspaExibicao(dataStr);
+        var partes = dataLimpa.split('/');
+        if (partes.length === 3) return partes[2] + '-' + partes[1] + '-' + partes[0];
+        return dataLimpa;
     }
 
     function showToast(msg, type) {
         var toast = document.getElementById('toast');
         toast.textContent = msg;
-        toast.className = 'toast ' + (type || 'error') + ' show';
+        toast.className = 'toast ' + (type || 'info') + ' show';
         setTimeout(function() { toast.classList.remove('show'); }, 3000);
     }
 
@@ -414,7 +522,7 @@ label {
 
     function fazerLogin() {
         var senha = document.getElementById('login-senha').value.trim();
-        if (!senha) { showToast('Digite sua senha'); return; }
+        if (!senha) { showToast('Digite sua senha', 'error'); return; }
         
         var btn = document.getElementById('login-btn');
         btn.innerHTML = '<div class="spinner-white"></div>';
@@ -431,10 +539,10 @@ label {
                 document.getElementById('teacher-name').innerText = currentProfessor;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('dashboard-screen').classList.remove('hidden');
-                loadData();
+                loadAllData();
                 showToast('Bem-vindo, ' + currentProfessor + '!', 'success');
             } else {
-                showToast(result?.message || 'Senha invalida');
+                showToast(result?.message || 'Senha invalida', 'error');
             }
         }, false);
     }
@@ -445,35 +553,91 @@ label {
         document.getElementById('dashboard-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
         document.getElementById('login-senha').value = '';
+        showToast('Logout realizado', 'info');
     }
 
-    function loadData() {
-        showGlobalSpinner(true, 'Carregando agenda...');
-        
+    function loadAllData() {
+        loadAgenda();
+        loadCancelamentos();
+        loadDispo();
+        loadSolicit();
+    }
+
+    function loadAgenda() {
         callAPI('get_data', { professor: currentProfessor }, function(result) {
-            if (result.success && result.agenda && result.agenda.length > 0) {
+            if (result.success && result.agenda) {
                 agendaData = result.agenda || [];
-                solicitData = result.solicit || [];
+                renderAgendaHoje();
+                renderCalendar();
+                updateSelectedDayEvents();
+                showToast('Agenda carregada', 'success');
             } else {
                 agendaData = [];
-                solicitData = [];
-                showToast('Nenhum dado encontrado na API', 'error');
+                showToast('Erro ao carregar agenda', 'error');
             }
-            
-            renderAll();
-            showGlobalSpinner(false);
         });
     }
 
-    function renderAll() {
-        renderAgendaHoje();
-        renderPending();
-        renderCalendar();
-        updateSelectedDayEvents();
-        var dot = document.getElementById('pending-dot');
-        if (solicitData.length > 0) dot.classList.add('visible');
-        else dot.classList.remove('visible');
-        lucide.createIcons();
+    function loadCancelamentos() {
+        callAPI('get_cancel', { professor: currentProfessor }, function(result) {
+            if (result.success && result.cancel) {
+                cancelData = result.cancel || [];
+                renderAgendaHoje();
+            }
+        });
+    }
+
+    function loadDispo() {
+        callAPI('get_dispo', { professor: currentProfessor }, function(result) {
+            if (result.success && result.dispo) {
+                dispoData = result.dispo || [];
+                for (var i = 0; i < dispoData.length; i++) {
+                    if (dispoData[i].horario_inicial) {
+                        dispoData[i].horario_inicial = removerAspaExibicao(dispoData[i].horario_inicial);
+                    }
+                    if (dispoData[i].horario_final) {
+                        dispoData[i].horario_final = removerAspaExibicao(dispoData[i].horario_final);
+                    }
+                }
+                renderDispo();
+                showToast('Disponibilidade carregada', 'success');
+            } else {
+                dispoData = [];
+                renderDispo();
+            }
+        });
+    }
+
+    function loadSolicit() {
+        callAPI('get_data', { professor: currentProfessor }, function(result) {
+            if (result.success && result.solicit) {
+                solicitData = result.solicit || [];
+                renderPending();
+                var dot = document.getElementById('pending-dot');
+                if (solicitData.length > 0) dot.classList.add('visible');
+                else dot.classList.remove('visible');
+                showToast(solicitData.length + ' solicitações pendentes', 'info');
+            } else {
+                solicitData = [];
+                renderPending();
+            }
+            lucide.createIcons();
+        });
+    }
+
+    function isCanceladoHoje(evento, dataHoje) {
+        for (var i = 0; i < cancelData.length; i++) {
+            var cancel = cancelData[i];
+            var dataCancelamento = cancel.data_cancelamento ? removerAspaExibicao(cancel.data_cancelamento) : '';
+            if (dataCancelamento === dataHoje &&
+                cancel.professor === evento.professor &&
+                cancel.cliente === evento.cliente &&
+                cancel.horario === evento.horario &&
+                cancel.compromisso === evento.compromisso) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function renderAgendaHoje() {
@@ -487,19 +651,31 @@ label {
             if (e.status === 'Cancelado') continue;
             
             var match = false;
-            if (e.dia_da_semana && isDataString(e.dia_da_semana)) {
-                var dataISO = converterDataParaISO(e.dia_da_semana);
+            var isRecorrente = false;
+            
+            var diaSemana = removerAspaExibicao(e.dia_da_semana);
+            if (diaSemana && isDataString(diaSemana)) {
+                var dataISO = converterDataParaISO(diaSemana);
                 if (dataISO === hojeStr) match = true;
             }
-            else if (e.dia_da_semana && e.dia_da_semana === hojeWeekday) {
+            else if (diaSemana && diaSemana === hojeWeekday) {
                 match = true;
+                isRecorrente = true;
             }
             
-            if (match) events.push(e);
+            if (match && isRecorrente) {
+                if (!isCanceladoHoje(e, hojeStr)) {
+                    events.push(e);
+                }
+            } else if (match) {
+                events.push(e);
+            }
         }
         
         events.sort(function(a, b) {
-            return formatarHorario(a.horario).localeCompare(formatarHorario(b.horario));
+            var horaA = removerAspaExibicao(a.horario || '');
+            var horaB = removerAspaExibicao(b.horario || '');
+            return horaA.localeCompare(horaB);
         });
         
         document.getElementById('current-date').innerHTML = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -513,14 +689,21 @@ label {
         var html = '';
         for (var i = 0; i < events.length; i++) {
             var e = events[i];
+            var horarioExibicao = removerAspaExibicao(e.horario || '--:--');
             html += '<div class="card-agenda p-4 md:p-5 rounded-xl md:rounded-2xl">' +
                 '<div class="flex justify-between items-center">' +
                     '<div class="flex items-center gap-4">' +
-                        '<div class="text-xl md:text-2xl font-bold text-[#c20000] w-20">' + formatarHorario(e.horario) + '</div>' +
+                        '<div class="text-xl md:text-2xl font-bold text-[#c20000] w-20">' + horarioExibicao + '</div>' +
                         '<div>' +
                             '<h3 class="font-semibold text-white text-base md:text-lg">' + (e.cliente || '---') + '</h3>' +
                             '<p class="text-xs text-zinc-400">' + (e.compromisso || 'Aula') + (e.descricao ? ' • ' + e.descricao : '') + '</p>' +
+                            (e.whatsapp_cliente ? '<p class="text-[10px] text-zinc-500 mt-1">📱 ' + e.whatsapp_cliente + '</p>' : '') +
                         '</div>' +
+                    '</div>' +
+                    '<div class="action-buttons">' +
+                        '<button onclick="event.stopPropagation(); openEditEventModal(' + e.rowId + ')" class="action-btn" title="Editar"><i data-lucide="edit-2" class="w-4 h-4"></i></button>' +
+                        '<button onclick="event.stopPropagation(); openRescheduleModal(' + e.rowId + ')" class="action-btn reschedule" title="Reagendar"><i data-lucide="calendar-clock" class="w-4 h-4"></i></button>' +
+                        '<button onclick="event.stopPropagation(); openCancelModal(' + e.rowId + ')" class="action-btn cancel" title="Cancelar"><i data-lucide="x-circle" class="w-4 h-4"></i></button>' +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -529,32 +712,228 @@ label {
         lucide.createIcons();
     }
 
-    function renderPending() {
-        var tbody = document.getElementById('pending-list');
-        if (!solicitData.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 md:py-12 text-zinc-500 text-sm">Nenhuma solicitação pendente</td></td>';
+    function openCancelModal(rowId) {
+        var evento = null;
+        for (var i = 0; i < agendaData.length; i++) {
+            if (agendaData[i].rowId == rowId) {
+                evento = agendaData[i];
+                break;
+            }
+        }
+        if (!evento) return;
+        
+        var isRecorrente = (evento.dia_da_semana && !isDataString(removerAspaExibicao(evento.dia_da_semana)));
+        var msgRecorrente = '';
+        if (isRecorrente) {
+            msgRecorrente = '<p class="text-xs text-yellow-500 mb-2">⚠️ Esta é uma aula recorrente. O cancelamento afetará apenas o dia de hoje.</p>';
+        }
+        
+        var horarioExibicao = removerAspaExibicao(evento.horario || '');
+        
+        var modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = 
+            '<h3 class="font-light mb-3">Cancelar Compromisso</h3>' +
+            '<div class="mb-3 p-2 bg-white/5 rounded-lg">' +
+                '<p class="text-sm text-white">' + (evento.cliente || '') + '</p>' +
+                '<p class="text-xs text-zinc-500 mt-1">' + (evento.compromisso || 'Aula') + ' • ' + horarioExibicao + '</p>' +
+            '</div>' +
+            msgRecorrente +
+            '<form onsubmit="submitCancel(event, ' + rowId + ')">' +
+                '<div class="form-group">' +
+                    '<label>Reembolsável?</label>' +
+                    '<select id="reembolsavel" required>' +
+                        '<option value="sim">Sim - Aluno tem direito a reembolso</option>' +
+                        '<option value="nao">Não - Sem direito a reembolso</option>' +
+                    '</select>' +
+                '</div>' +
+                '<div class="form-group">' +
+                    '<label>Motivo do Cancelamento</label>' +
+                    '<textarea id="motivo" rows="3" placeholder="Descreva o motivo..." required></textarea>' +
+                '</div>' +
+                '<div class="flex gap-2 mt-3">' +
+                    '<button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Voltar</button>' +
+                    '<button type="submit" class="flex-1 bg-red-600/20 py-1.5 rounded-lg text-xs text-red-400">Confirmar Cancelamento</button>' +
+                '</div>' +
+            '</form>';
+        
+        document.getElementById('modal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    function submitCancel(event, rowId) {
+        event.preventDefault();
+        var evento = null;
+        for (var i = 0; i < agendaData.length; i++) {
+            if (agendaData[i].rowId == rowId) {
+                evento = agendaData[i];
+                break;
+            }
+        }
+        
+        var reembolsavel = document.getElementById('reembolsavel').value;
+        var motivo = document.getElementById('motivo').value;
+        var hoje = new Date();
+        var hojeStr = hoje.toISOString().split('T')[0];
+        
+        var isRecorrente = (evento.dia_da_semana && !isDataString(removerAspaExibicao(evento.dia_da_semana)));
+        
+        var cancelData = {
+            professor: currentProfessor,
+            compromisso: evento.compromisso,
+            dia_da_semana: evento.dia_da_semana,
+            horario: evento.horario,
+            cliente: evento.cliente,
+            whatsapp_cliente: evento.whatsapp_cliente || "",
+            cupom: evento['cupom?'] || "",
+            instagram_cliente: evento.instagram_cliente || "",
+            descricao: evento.descricao || "",
+            reembolsavel: reembolsavel,
+            motivo: motivo,
+            data_cancelamento: hojeStr
+        };
+        
+        showGlobalSpinner(true, 'Registrando cancelamento...');
+        
+        callAPI('add_to_cancel', { data: JSON.stringify(cancelData) }, function(result) {
+            if (result.success) {
+                if (!isRecorrente) {
+                    callAPI('update_agenda_status', { rowId: rowId, status: 'Cancelado' }, function(statusResult) {
+                        showGlobalSpinner(false);
+                        closeModal();
+                        loadAllData();
+                        showToast('Compromisso cancelado!', 'success');
+                    });
+                } else {
+                    showGlobalSpinner(false);
+                    closeModal();
+                    loadAllData();
+                    showToast('Aula de hoje cancelada!', 'success');
+                }
+            } else {
+                showGlobalSpinner(false);
+                showToast('Erro ao cancelar', 'error');
+            }
+        });
+    }
+
+    function openRescheduleModal(rowId) {
+        var evento = null;
+        for (var i = 0; i < agendaData.length; i++) {
+            if (agendaData[i].rowId == rowId) {
+                evento = agendaData[i];
+                break;
+            }
+        }
+        if (!evento) return;
+        
+        var horarioAtual = removerAspaExibicao(evento.horario || '');
+        var diaAtual = removerAspaExibicao(evento.dia_da_semana || '-');
+        
+        var modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = 
+            '<h3 class="font-light mb-3">Reagendar Compromisso</h3>' +
+            '<div class="mb-3 p-2 bg-white/5 rounded-lg">' +
+                '<p class="text-sm text-white">' + (evento.cliente || '') + '</p>' +
+                '<p class="text-xs text-zinc-500 mt-1">Atual: ' + diaAtual + ' às ' + horarioAtual + '</p>' +
+            '</div>' +
+            '<form onsubmit="submitReschedule(event, ' + rowId + ')">' +
+                '<div class="form-group"><label>Nova Data</label><input type="text" id="novaData" placeholder="Ex: 20/04/2026 ou Segunda-feira" required></div>' +
+                '<div class="form-group"><label>Novo Horário</label><input type="text" id="novoHorario" placeholder="Ex: 15:30" required></div>' +
+                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">Confirmar</button></div>' +
+            '</form>';
+        
+        document.getElementById('modal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    function submitReschedule(event, rowId) {
+        event.preventDefault();
+        
+        var novaData = document.getElementById('novaData').value;
+        var novoHorario = document.getElementById('novoHorario').value;
+        
+        var eventoAtual = null;
+        for (var i = 0; i < agendaData.length; i++) {
+            if (agendaData[i].rowId == rowId) {
+                eventoAtual = agendaData[i];
+                break;
+            }
+        }
+        
+        var novaDataComAspa = "'" + novaData;
+        var novoHorarioComAspa = "'" + novoHorario;
+        
+        var updateData = {
+            rowId: rowId,
+            cliente: eventoAtual.cliente,
+            compromisso: eventoAtual.compromisso,
+            whatsapp_cliente: eventoAtual.whatsapp_cliente,
+            instagram_cliente: eventoAtual.instagram_cliente,
+            descricao: eventoAtual.descricao,
+            dia_da_semana: novaDataComAspa,
+            horario: novoHorarioComAspa
+        };
+        
+        showGlobalSpinner(true, 'Reagendando...');
+        
+        callAPI('update_agenda', { data: JSON.stringify(updateData) }, function(result) {
+            showGlobalSpinner(false);
+            if (result.success) {
+                closeModal();
+                loadAllData();
+                showToast('Compromisso reagendado!', 'success');
+            } else {
+                showToast('Erro ao reagendar', 'error');
+            }
+        });
+    }
+
+    function confirmDeleteAgenda(rowId) {
+        var modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = 
+            '<h3 class="font-light mb-3">Excluir Compromisso</h3>' +
+            '<p class="text-sm text-zinc-400 mb-4">Tem certeza que deseja excluir permanentemente este compromisso? Esta ação não pode ser desfeita.</p>' +
+            '<div class="flex gap-2">' +
+                '<button onclick="closeModal()" class="flex-1 bg-white/5 py-2 rounded-lg text-xs">Cancelar</button>' +
+                '<button onclick="deleteAgenda(' + rowId + ')" class="flex-1 bg-red-600/20 py-2 rounded-lg text-xs text-red-400">Excluir</button>' +
+            '</div>';
+        
+        document.getElementById('modal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    function deleteAgenda(rowId) {
+        closeModal();
+        showGlobalSpinner(true, 'Excluindo...');
+        
+        callAPI('delete_agenda', { rowId: rowId }, function(result) {
+            showGlobalSpinner(false);
+            if (result.success) {
+                loadAllData();
+                showToast('Compromisso excluído!', 'success');
+            } else {
+                showToast('Erro ao excluir', 'error');
+            }
+        });
+    }
+
+    function renderDispo() {
+        var tbody = document.getElementById('dispo-list');
+        if (!dispoData.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-zinc-500">Nenhum horário cadastrado</td><tr><td colspan="4" class="text-center py-2 text-zinc-600 text-xs">Clique em "Novo Range" para adicionar</td></tr>';
             return;
         }
         
         var html = '';
-        for (var i = 0; i < solicitData.length; i++) {
-            var s = solicitData[i];
-            var dataExibicao = s.dia_da_semana || '-';
-            html += '<tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors">' +
-                '<td class="px-4 md:px-6 py-3 md:py-4">' +
-                    '<p class="text-sm md:text-base font-medium">' + (s.cliente || '---') + '</p>' +
-                    (s.whatsapp_cliente ? '<p class="text-[9px] md:text-[10px] text-zinc-500 mt-1">📱 ' + s.whatsapp_cliente + '</p>' : '') +
-                '</td>' +
-                '<td class="px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm text-zinc-400">' + (s.compromisso || '---') + '</td>' +
-                '<td class="px-4 md:px-6 py-3 md:py-4">' +
-                    '<span class="text-xs md:text-sm">' + dataExibicao + '</span><br>' +
-                    '<span class="text-[11px] md:text-xs text-[#c20000] font-semibold">' + formatarHorario(s.horario) + '</span>' +
-                '</td>' +
-                '<td class="px-4 md:px-6 py-3 md:py-4 text-right">' +
-                    '<div class="flex gap-2 justify-end">' +
-                        '<button onclick="abrirPaginaRecusa(' + s.rowId + ')" class="btn-recusar flex items-center gap-1"><i data-lucide="x" class="w-3 h-3"></i> Recusar</button>' +
-                        '<button onclick="openApproveModal(' + s.rowId + ')" class="btn-aprovar flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Aprovar</button>' +
-                    '</div>' +
+        for (var i = 0; i < dispoData.length; i++) {
+            var d = dispoData[i];
+            html += '<tr>' +
+                '<td><span class="weekday-tag">' + (d.dia_da_semana || '-') + '</span></td>' +
+                '<td>' + (d.horario_inicial || '-') + '</td>' +
+                '<td>' + (d.horario_final || '-') + '</td>' +
+                '<td>' +
+                    '<button onclick="openEditDispoModal(' + d.rowId + ')" class="action-btn mr-2"><i data-lucide="edit-2" class="w-3 h-3"></i></button>' +
+                    '<button onclick="confirmDeleteDispo(' + d.rowId + ')" class="action-btn delete"><i data-lucide="trash-2" class="w-3 h-3"></i></button>' +
                 '</td>' +
             '</tr>';
         }
@@ -562,8 +941,161 @@ label {
         lucide.createIcons();
     }
 
-    // ==================== RECUSAR SOLICITAÇÃO ====================
-    
+    function confirmDeleteDispo(rowId) {
+        var modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = 
+            '<h3 class="font-light mb-3">Excluir Disponibilidade</h3>' +
+            '<p class="text-sm text-zinc-400 mb-4">Tem certeza que deseja excluir este horário?</p>' +
+            '<div class="flex gap-2"><button onclick="closeModal()" class="flex-1 bg-white/5 py-2 rounded-lg text-xs">Cancelar</button><button onclick="deleteDispo(' + rowId + ')" class="flex-1 bg-red-600/20 py-2 rounded-lg text-xs text-red-400">Excluir</button></div>';
+        
+        document.getElementById('modal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    function deleteDispo(rowId) {
+        closeModal();
+        showGlobalSpinner(true, 'Excluindo...');
+        callAPI('delete_dispo', { rowId: rowId }, function(result) {
+            showGlobalSpinner(false);
+            if (result.success) {
+                loadDispo();
+                showToast('Disponibilidade excluída!', 'success');
+            } else {
+                showToast('Erro ao excluir', 'error');
+            }
+        });
+    }
+
+    function openAddDispoModal() {
+        var modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = 
+            '<h3 class="font-light mb-3">Novo Range de Horário</h3>' +
+            '<form onsubmit="submitAddDispo(event)">' +
+                '<div class="form-group"><label>Dia da Semana</label><select id="dia_da_semana" required>' +
+                    '<option value="">Selecione</option>' +
+                    '<option value="Segunda-feira">Segunda-feira</option><option value="Terça-feira">Terça-feira</option>' +
+                    '<option value="Quarta-feira">Quarta-feira</option><option value="Quinta-feira">Quinta-feira</option>' +
+                    '<option value="Sexta-feira">Sexta-feira</option><option value="Sábado">Sábado</option><option value="Domingo">Domingo</option>' +
+                '</select></div>' +
+                '<div class="form-group"><label>Horário Inicial</label><input type="text" id="horario_inicial" placeholder="Ex: 08:00" required></div>' +
+                '<div class="form-group"><label>Horário Final</label><input type="text" id="horario_final" placeholder="Ex: 12:00" required></div>' +
+                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">Salvar</button></div>' +
+            '</form>';
+        
+        document.getElementById('modal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    function submitAddDispo(event) {
+        event.preventDefault();
+        
+        var horarioInicial = document.getElementById('horario_inicial').value;
+        var horarioFinal = document.getElementById('horario_final').value;
+        
+        var newDispo = {
+            professor: currentProfessor,
+            dia_da_semana: document.getElementById('dia_da_semana').value,
+            horario_inicial: horarioInicial ? "'" + horarioInicial : '',
+            horario_final: horarioFinal ? "'" + horarioFinal : ''
+        };
+        
+        showGlobalSpinner(true, 'Adicionando...');
+        callAPI('add_dispo', { data: JSON.stringify(newDispo) }, function(result) {
+            showGlobalSpinner(false);
+            if (result.success) {
+                closeModal();
+                loadDispo();
+                showToast('Disponibilidade adicionada!', 'success');
+            } else {
+                showToast('Adicionado', 'error');
+            }
+        });
+    }
+
+    function openEditDispoModal(rowId) {
+        var item = null;
+        for (var i = 0; i < dispoData.length; i++) {
+            if (dispoData[i].rowId == rowId) {
+                item = dispoData[i];
+                break;
+            }
+        }
+        if (!item) return;
+        
+        var modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = 
+            '<h3 class="font-light mb-3">Editar Disponibilidade</h3>' +
+            '<form onsubmit="submitEditDispo(event, ' + rowId + ')">' +
+                '<div class="form-group"><label>Dia da Semana</label><select id="dia_da_semana" required>' +
+                    '<option value="Segunda-feira"' + (item.dia_da_semana === 'Segunda-feira' ? ' selected' : '') + '>Segunda-feira</option>' +
+                    '<option value="Terça-feira"' + (item.dia_da_semana === 'Terça-feira' ? ' selected' : '') + '>Terça-feira</option>' +
+                    '<option value="Quarta-feira"' + (item.dia_da_semana === 'Quarta-feira' ? ' selected' : '') + '>Quarta-feira</option>' +
+                    '<option value="Quinta-feira"' + (item.dia_da_semana === 'Quinta-feira' ? ' selected' : '') + '>Quinta-feira</option>' +
+                    '<option value="Sexta-feira"' + (item.dia_da_semana === 'Sexta-feira' ? ' selected' : '') + '>Sexta-feira</option>' +
+                    '<option value="Sábado"' + (item.dia_da_semana === 'Sábado' ? ' selected' : '') + '>Sábado</option>' +
+                    '<option value="Domingo"' + (item.dia_da_semana === 'Domingo' ? ' selected' : '') + '>Domingo</option>' +
+                '</select></div>' +
+                '<div class="form-group"><label>Horário Inicial</label><input type="text" id="horario_inicial" value="' + (item.horario_inicial || '') + '" required></div>' +
+                '<div class="form-group"><label>Horário Final</label><input type="text" id="horario_final" value="' + (item.horario_final || '') + '" required></div>' +
+                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">Salvar</button></div>' +
+            '</form>';
+        
+        document.getElementById('modal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    function submitEditDispo(event, rowId) {
+        event.preventDefault();
+        
+        var horarioInicial = document.getElementById('horario_inicial').value;
+        var horarioFinal = document.getElementById('horario_final').value;
+        
+        var updateData = {
+            rowId: rowId,
+            dia_da_semana: document.getElementById('dia_da_semana').value,
+            horario_inicial: horarioInicial ? "'" + horarioInicial : '',
+            horario_final: horarioFinal ? "'" + horarioFinal : ''
+        };
+        
+        showGlobalSpinner(true, 'Atualizando...');
+        callAPI('update_dispo', { data: JSON.stringify(updateData) }, function(result) {
+            showGlobalSpinner(false);
+            if (result.success) {
+                closeModal();
+                loadDispo();
+                showToast('Disponibilidade atualizada!', 'success');
+            } else {
+                showToast('Erro ao atualizar', 'error');
+            }
+        });
+    }
+
+    function renderPending() {
+        var tbody = document.getElementById('pending-list');
+        if (!solicitData.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-zinc-500">Nenhuma solicitação pendente</td></tr><tr><td colspan="4" class="text-center py-2 text-zinc-600 text-xs">Aproveite, está tudo tranquilo!</td></tr>';
+            return;
+        }
+        
+        var html = '';
+        for (var i = 0; i < solicitData.length; i++) {
+            var s = solicitData[i];
+            var dataExibicao = removerAspaExibicao(s.dia_da_semana || '-');
+            var horarioExibicao = removerAspaExibicao(s.horario || '');
+            html += '<tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors">' +
+                '<td class="px-4 py-3"><p class="font-medium">' + (s.cliente || '---') + '</p>' + (s.whatsapp_cliente ? '<p class="text-[9px] text-zinc-500">📱 ' + s.whatsapp_cliente + '</p>' : '') + '</td>' +
+                '<td class="px-4 py-3 text-xs text-zinc-400">' + (s.compromisso || '---') + '</td>' +
+                '<td class="px-4 py-3"><span class="text-xs">' + dataExibicao + '</span><br><span class="text-[10px] text-[#c20000] font-semibold">' + horarioExibicao + '</span></td>' +
+                '<td class="px-4 py-3 text-right"><div class="flex gap-2 justify-end">' +
+                    '<button onclick="abrirPaginaRecusa(' + s.rowId + ')" class="btn-recusar flex items-center gap-1"><i data-lucide="x" class="w-3 h-3"></i> Recusar</button>' +
+                    '<button onclick="openApproveModal(' + s.rowId + ')" class="btn-aprovar flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Aprovar</button>' +
+                '</div></td>' +
+            '</tr>';
+        }
+        tbody.innerHTML = html;
+        lucide.createIcons();
+    }
+
     function abrirPaginaRecusa(rowId) {
         for (var i = 0; i < solicitData.length; i++) {
             if (solicitData[i].rowId == rowId) {
@@ -571,52 +1103,32 @@ label {
                 break;
             }
         }
+        if (!solicitacaoSelecionada) return;
         
-        if (!solicitacaoSelecionada) {
-            showToast('Erro: solicitação não encontrada', 'error');
-            return;
-        }
-        
-        var numeroWhatsApp = solicitacaoSelecionada.whatsapp_cliente || "";
-        numeroWhatsApp = String(numeroWhatsApp);
-        
+        var numeroWhatsApp = String(solicitacaoSelecionada.whatsapp_cliente || "");
         var mensagem = 'Hi ' + solicitacaoSelecionada.cliente + '! Recebi sua solicitação de ' + solicitacaoSelecionada.compromisso + ', mas infelizmente o horário solicitado não está disponível. Podemos reagendar manualmente por aqui? Obrigada pela paciência. Um abraço da teacher.';
         
         var whatsappLink = '';
         if (numeroWhatsApp && numeroWhatsApp !== '') {
             var numeroLimpo = numeroWhatsApp.replace(/\D/g, '');
-            if (numeroLimpo) {
-                whatsappLink = 'https://wa.me/55' + numeroLimpo;
-            }
+            if (numeroLimpo) whatsappLink = 'https://wa.me/55' + numeroLimpo;
         }
+        
+        var horarioExibicao = removerAspaExibicao(solicitacaoSelecionada.horario || '');
+        var diaExibicao = removerAspaExibicao(solicitacaoSelecionada.dia_da_semana || '-');
         
         var container = document.getElementById('recusa-conteudo');
         container.innerHTML = `
-            <div class="mb-4">
-                <p class="text-zinc-400 text-xs uppercase tracking-wider mb-1">Cliente</p>
-                <p class="text-white text-base font-medium">${solicitacaoSelecionada.cliente}</p>
-            </div>
-            <div class="mb-4">
-                <p class="text-zinc-400 text-xs uppercase tracking-wider mb-1">Compromisso</p>
-                <p class="text-white text-sm">${solicitacaoSelecionada.compromisso} • ${solicitacaoSelecionada.dia_da_semana || '-'} às ${formatarHorario(solicitacaoSelecionada.horario)}</p>
-            </div>
-            <div class="mb-4">
-                <p class="text-zinc-400 text-xs uppercase tracking-wider mb-2">Mensagem para o aluno</p>
-                <div class="message-box text-sm">${mensagem}</div>
-            </div>
+            <div class="mb-4"><p class="text-zinc-400 text-xs uppercase mb-1">Cliente</p><p class="text-white font-medium">${solicitacaoSelecionada.cliente}</p></div>
+            <div class="mb-4"><p class="text-zinc-400 text-xs uppercase mb-1">Compromisso</p><p class="text-white text-sm">${solicitacaoSelecionada.compromisso} • ${diaExibicao} às ${horarioExibicao}</p></div>
+            <div class="mb-4"><p class="text-zinc-400 text-xs uppercase mb-2">Mensagem</p><div class="message-box text-sm">${mensagem}</div></div>
             <div class="flex gap-3 mb-4">
-                <button onclick="copiarMensagemRecusa()" class="flex-1 bg-white/10 py-2 rounded-lg text-sm hover:bg-white/20 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="copy" class="w-3 h-3"></i> Copiar
-                </button>
-                ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" class="flex-1 btn-whatsapp text-center py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
-                    <i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp
-                </a>` : '<button disabled class="flex-1 bg-gray-600 py-2 rounded-lg text-sm cursor-not-allowed flex items-center justify-center gap-2"><i data-lucide="alert-circle" class="w-3 h-3"></i> Sem WhatsApp</button>'}
+                <button onclick="copiarMensagemRecusa()" class="flex-1 bg-white/10 py-2 rounded-lg text-sm flex items-center justify-center gap-2"><i data-lucide="copy" class="w-3 h-3"></i> Copiar</button>
+                ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" class="flex-1 btn-whatsapp text-center py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp</a>` : '<button disabled class="flex-1 bg-gray-600 py-2 rounded-lg text-sm cursor-not-allowed">Sem WhatsApp</button>'}
             </div>
             <div class="border-t border-white/10 pt-3">
                 <p class="text-xs text-zinc-500 mb-2">Após enviar a mensagem, confirme a recusa:</p>
-                <button onclick="confirmarRecusa()" class="w-full bg-red-600/20 hover:bg-red-600/30 py-2 rounded-lg text-sm text-red-400 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="x-circle" class="w-3 h-3"></i> Confirmar Recusa
-                </button>
+                <button onclick="confirmarRecusa()" class="w-full bg-red-600/20 hover:bg-red-600/30 py-2 rounded-lg text-sm text-red-400 flex items-center justify-center gap-2"><i data-lucide="x-circle" class="w-3 h-3"></i> Confirmar Recusa</button>
             </div>
         `;
         
@@ -624,7 +1136,7 @@ label {
         document.getElementById('pagina-recusa').style.display = 'block';
         lucide.createIcons();
     }
-    
+
     function copiarMensagemRecusa() {
         var msgDiv = document.querySelector('#recusa-conteudo .message-box');
         if (msgDiv) {
@@ -637,23 +1149,21 @@ label {
             showToast('Mensagem copiada!', 'success');
         }
     }
-    
+
     function fecharPaginaRecusa() {
         document.getElementById('solicitacoes-list').style.display = 'block';
         document.getElementById('pagina-recusa').style.display = 'none';
         solicitacaoSelecionada = null;
     }
-    
+
     function confirmarRecusa() {
         if (!solicitacaoSelecionada) return;
-        
         showGlobalSpinner(true, 'Processando...');
-        
         callAPI('update_status', { id: solicitacaoSelecionada.rowId, status: 'Recusado' }, function(statusResult) {
             showGlobalSpinner(false);
             if (statusResult.success) {
                 fecharPaginaRecusa();
-                loadData();
+                loadSolicit();
                 showToast('Solicitação recusada!', 'success');
             } else {
                 showToast('Erro ao recusar', 'error');
@@ -661,8 +1171,6 @@ label {
         });
     }
 
-    // ==================== APROVAR SOLICITAÇÃO ====================
-    
     function openApproveModal(rowId) {
         var req = null;
         for (var i = 0; i < solicitData.length; i++) {
@@ -673,22 +1181,11 @@ label {
         }
         if (!req) return;
         
-        // CORREÇÃO: Formata o horário para apenas HH:MM
-        var horarioExibicao = req.horario || "";
-        if (horarioExibicao && typeof horarioExibicao === 'string') {
-            if (horarioExibicao.match(/^\d{2}:\d{2}:/)) {
-                horarioExibicao = horarioExibicao.substring(0, 5);
-            } else if (horarioExibicao.includes('T')) {
-                var match = horarioExibicao.match(/(\d{2}):(\d{2}):/);
-                if (match) {
-                    horarioExibicao = match[1] + ':' + match[2];
-                }
-            }
-        }
+        var horarioExibicao = removerAspaExibicao(req.horario || '');
         
         var modalBody = document.getElementById('modal-body');
         modalBody.innerHTML = 
-            '<h3 class="font-light mb-3">✓ Aprovar Solicitação</h3>' +
+            '<h3 class="font-light mb-3">Aprovar Solicitação</h3>' +
             '<div class="mb-3 p-2 bg-white/5 rounded-lg"><p class="text-xs text-zinc-400">Solicitação de <span class="text-white font-medium">' + (req.cliente || '') + '</span></p></div>' +
             '<form onsubmit="submitApprove(event, ' + rowId + ')">' +
                 '<div class="form-group"><label>Cliente</label><input type="text" id="appCliente" value="' + (req.cliente || '') + '" required></div>' +
@@ -699,9 +1196,9 @@ label {
                     '<option value="Aula extra"' + (req.compromisso === 'Aula extra' ? ' selected' : '') + '>Aula Extra</option>' +
                     '<option value="Conversa Informal"' + (req.compromisso === 'Conversa Informal' ? ' selected' : '') + '>Conversa Informal</option>' +
                 '</select></div>' +
-                '<div class="form-group"><label>Data (DD/MM/AAAA ou dia da semana)</label><input type="text" id="appData" value="' + (req.dia_da_semana || '') + '" required></div>' +
-                '<div class="form-group"><label>Horário</label><input type="text" id="appHorario" value="' + horarioExibicao + '" placeholder="Ex: 14:30" required></div>' +
-                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">✓ Aprovar</button></div>' +
+                '<div class="form-group"><label>Data</label><input type="text" id="appData" value="' + (removerAspaExibicao(req.dia_da_semana) || '') + '" required></div>' +
+                '<div class="form-group"><label>Horário</label><input type="text" id="appHorario" value="' + horarioExibicao + '" required></div>' +
+                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">Aprovar</button></div>' +
             '</form>';
         
         document.getElementById('modal').classList.add('active');
@@ -711,18 +1208,19 @@ label {
     function submitApprove(event, rowId) {
         event.preventDefault();
         
+        var dataDigitada = document.getElementById('appData').value;
+        var horarioDigitado = document.getElementById('appHorario').value;
+        
         var newEvent = {
             professor: currentProfessor,
             cliente: document.getElementById('appCliente').value,
             whatsapp_cliente: document.getElementById('appWhatsapp').value,
             instagram_cliente: document.getElementById('appInstagram').value,
             compromisso: document.getElementById('appCompromisso').value,
-            dia_da_semana: document.getElementById('appData').value,
-            horario: document.getElementById('appHorario').value,
+            dia_da_semana: dataDigitada ? "'" + dataDigitada : '',
+            horario: horarioDigitado ? "'" + horarioDigitado : '',
             cupom: ""
         };
-        
-        console.log("Enviando para API:", newEvent);
         
         showGlobalSpinner(true, 'Aprovando...');
         
@@ -731,8 +1229,8 @@ label {
                 callAPI('update_status', { id: rowId, status: 'Aprovado' }, function(statusResult) {
                     showGlobalSpinner(false);
                     closeModal();
-                    loadData();
-                    showToast('✓ Solicitação aprovada!', 'success');
+                    loadAllData();
+                    showToast('Solicitação aprovada!', 'success');
                 });
             } else {
                 showGlobalSpinner(false);
@@ -741,8 +1239,6 @@ label {
         });
     }
 
-    // ==================== CALENDÁRIO ====================
-    
     function renderCalendar() {
         var year = currentDate.getFullYear(), month = currentDate.getMonth();
         document.getElementById('calendar-month-year').innerHTML = monthNames[month] + ' ' + year;
@@ -752,9 +1248,7 @@ label {
         var container = document.getElementById('calendar-body');
         var headers = Array.from(container.children).slice(0, 7);
         container.innerHTML = '';
-        for (var h = 0; h < headers.length; h++) {
-            container.appendChild(headers[h]);
-        }
+        for (var h = 0; h < headers.length; h++) container.appendChild(headers[h]);
         
         var hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
@@ -772,21 +1266,19 @@ label {
             
             dayEl.className = 'calendar-day';
             dayEl.innerText = d;
-            
             if (dataAtual < hoje) dayEl.classList.add('past');
             
             var hasEvent = false;
             for (var e = 0; e < agendaData.length; e++) {
                 var item = agendaData[e];
                 if (item.status === 'Cancelado') continue;
-                
-                if (item.dia_da_semana && isDataString(item.dia_da_semana)) {
-                    var dataISO = converterDataParaISO(item.dia_da_semana);
+                var diaSemana = removerAspaExibicao(item.dia_da_semana);
+                if (diaSemana && isDataString(diaSemana)) {
+                    var dataISO = converterDataParaISO(diaSemana);
                     if (dataISO === dateStr) { hasEvent = true; break; }
                 }
-                else if (item.dia_da_semana && item.dia_da_semana === weekDays[dataAtual.getDay()]) {
-                    hasEvent = true;
-                    break;
+                else if (diaSemana && diaSemana === weekDays[dataAtual.getDay()]) {
+                    hasEvent = true; break;
                 }
             }
             if (hasEvent && dataAtual >= hoje) dayEl.classList.add('has-event');
@@ -798,9 +1290,7 @@ label {
                 return function() {
                     if (dataObj < hoje) { showToast('Não é possível selecionar datas passadas', 'error'); return; }
                     var days = document.querySelectorAll('.calendar-day');
-                    for (var i = 0; i < days.length; i++) {
-                        days[i].classList.remove('active-day');
-                    }
+                    for (var i = 0; i < days.length; i++) days[i].classList.remove('active-day');
                     this.classList.add('active-day');
                     selectedDate = date;
                     updateSelectedDayEvents();
@@ -821,39 +1311,39 @@ label {
         var parts = selectedDate.split('-');
         var year = parts[0], month = parts[1], day = parts[2];
         var dateObj = new Date(year, month-1, day);
-        document.getElementById('selected-date-title').innerHTML = '<i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i> ' + dateObj.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+        document.getElementById('selected-date-title').innerHTML = '<i data-lucide="calendar" class="w-3 h-3 inline mr-1"></i> ' + dateObj.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
         
         var events = [];
         for (var i = 0; i < agendaData.length; i++) {
             var e = agendaData[i];
             if (e.status === 'Cancelado') continue;
-            
-            if (e.dia_da_semana && isDataString(e.dia_da_semana)) {
-                var dataISO = converterDataParaISO(e.dia_da_semana);
+            var diaSemana = removerAspaExibicao(e.dia_da_semana);
+            if (diaSemana && isDataString(diaSemana)) {
+                var dataISO = converterDataParaISO(diaSemana);
                 if (dataISO === selectedDate) events.push(e);
             }
-            else if (e.dia_da_semana && e.dia_da_semana === weekDays[dateObj.getDay()]) {
+            else if (diaSemana && diaSemana === weekDays[dateObj.getDay()]) {
                 events.push(e);
             }
         }
         
         var container = document.getElementById('selected-day-agenda');
-        
         if (!events.length) {
-            container.innerHTML = '<div class="text-center text-zinc-500 py-8 text-sm">Nenhum compromisso agendado para esta data</div>';
+            container.innerHTML = '<div class="text-center text-zinc-500 py-8 text-sm">Nenhum compromisso agendado</div>';
             return;
         }
         
         var html = '';
         for (var i = 0; i < events.length; i++) {
             var e = events[i];
-            html += '<div class="card-agenda p-3 md:p-4 rounded-xl" onclick="openEditEventModal(' + (e.rowId) + ')">' +
+            var horarioExibicao = removerAspaExibicao(e.horario || '');
+            html += '<div class="card-agenda p-3 rounded-xl">' +
                 '<div class="flex justify-between items-center">' +
-                    '<div>' +
-                        '<p class="text-sm md:text-base font-medium">' + e.cliente + '</p>' +
-                        '<p class="text-[10px] md:text-xs text-zinc-500">' + (e.compromisso || 'Aula') + ' • ' + formatarHorario(e.horario) + '</p>' +
+                    '<div><p class="font-medium">' + e.cliente + '</p><p class="text-[10px] text-zinc-500">' + (e.compromisso || 'Aula') + ' • ' + horarioExibicao + '</p></div>' +
+                    '<div class="flex gap-2">' +
+                        '<button onclick="openEditEventModal(' + e.rowId + ')" class="action-btn"><i data-lucide="edit-2" class="w-3 h-3"></i></button>' +
+                        '<button onclick="confirmDeleteAgenda(' + e.rowId + ')" class="action-btn delete"><i data-lucide="trash-2" class="w-3 h-3"></i></button>' +
                     '</div>' +
-                    '<i data-lucide="edit-2" class="w-4 h-4 text-zinc-500"></i>' +
                 '</div>' +
             '</div>';
         }
@@ -867,8 +1357,56 @@ label {
         updateSelectedDayEvents();
     }
 
-    function closeModal() { 
-        document.getElementById('modal').classList.remove('active'); 
+    function openAddAgendaModal() {
+        var modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = 
+            '<h3 class="font-light mb-3">Novo Compromisso</h3>' +
+            '<form onsubmit="submitAddAgenda(event)">' +
+                '<div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div>' +
+                '<div class="form-group"><label>Compromisso</label><select id="compromisso" required>' +
+                    '<option value="Aula">Aula Regular</option><option value="Aula extra">Aula Extra</option><option value="Conversa Informal">Conversa Informal</option>' +
+                '</select></div>' +
+                '<div class="form-group"><label>Data</label><input type="text" id="dia_da_semana" placeholder="Ex: 15/04/2026 ou Segunda-feira" required></div>' +
+                '<div class="form-group"><label>Horário</label><input type="text" id="horario" placeholder="Ex: 14:30" required></div>' +
+                '<div class="form-group"><label>WhatsApp</label><input type="text" id="whatsapp" placeholder="11999999999"></div>' +
+                '<div class="form-group"><label>Instagram</label><input type="text" id="instagram" placeholder="@usuario"></div>' +
+                '<div class="form-group"><label>Descrição</label><textarea id="descricao" rows="2"></textarea></div>' +
+                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">Salvar</button></div>' +
+            '</form>';
+        
+        document.getElementById('modal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    function submitAddAgenda(event) {
+        event.preventDefault();
+        
+        var dataDigitada = document.getElementById('dia_da_semana').value;
+        var horarioDigitado = document.getElementById('horario').value;
+        
+        var newEvent = {
+            professor: currentProfessor,
+            cliente: document.getElementById('cliente').value,
+            compromisso: document.getElementById('compromisso').value,
+            dia_da_semana: dataDigitada ? "'" + dataDigitada : '',
+            horario: horarioDigitado ? "'" + horarioDigitado : '',
+            whatsapp_cliente: document.getElementById('whatsapp').value,
+            instagram_cliente: document.getElementById('instagram').value,
+            descricao: document.getElementById('descricao').value,
+            cupom: ""
+        };
+        
+        showGlobalSpinner(true, 'Adicionando...');
+        callAPI('add_to_agenda', { data: JSON.stringify(newEvent) }, function(result) {
+            showGlobalSpinner(false);
+            closeModal();
+            if (result && result.success === true) {
+                loadAllData();
+                showToast('Compromisso adicionado!', 'success');
+            } else {
+                showToast('Adicionado', 'error');
+            }
+        });
     }
 
     function openEditEventModal(rowId) {
@@ -881,11 +1419,12 @@ label {
         }
         if (!evento) return;
         
-        var horarioAtual = formatarHorario(evento.horario);
+        var horarioAtual = removerAspaExibicao(evento.horario || '');
+        var diaAtual = removerAspaExibicao(evento.dia_da_semana || '');
         
         var modalBody = document.getElementById('modal-body');
         modalBody.innerHTML = 
-            '<h3 class="font-light mb-3">✎ Editar Compromisso</h3>' +
+            '<h3 class="font-light mb-3">Editar Compromisso</h3>' +
             '<form onsubmit="submitEdit(event, ' + rowId + ')">' +
                 '<div class="form-group"><label>Cliente</label><input type="text" id="editCliente" value="' + (evento.cliente || '') + '" required></div>' +
                 '<div class="form-group"><label>WhatsApp</label><input type="text" id="editWhatsapp" value="' + (evento.whatsapp_cliente || '') + '"></div>' +
@@ -895,10 +1434,10 @@ label {
                     '<option value="Aula extra"' + (evento.compromisso === 'Aula extra' ? ' selected' : '') + '>Aula Extra</option>' +
                     '<option value="Conversa Informal"' + (evento.compromisso === 'Conversa Informal' ? ' selected' : '') + '>Conversa Informal</option>' +
                 '</select></div>' +
-                '<div class="form-group"><label>Dia (DD/MM/AAAA ou dia da semana)</label><input type="text" id="editDia" value="' + (evento.dia_da_semana || '') + '" required></div>' +
-                '<div class="form-group"><label>Horário (Ex: 14:30)</label><input type="text" id="editHorario" value="' + horarioAtual + '" placeholder="Ex: 14:30" required></div>' +
+                '<div class="form-group"><label>Data</label><input type="text" id="editDia" value="' + diaAtual + '" required></div>' +
+                '<div class="form-group"><label>Horário</label><input type="text" id="editHorario" value="' + horarioAtual + '" required></div>' +
                 '<div class="form-group"><label>Descrição</label><textarea id="editDescricao" rows="2">' + (evento.descricao || '') + '</textarea></div>' +
-                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">💾 Salvar</button></div>' +
+                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">Salvar</button></div>' +
             '</form>';
         
         document.getElementById('modal').classList.add('active');
@@ -908,8 +1447,8 @@ label {
     function submitEdit(event, rowId) {
         event.preventDefault();
         
-        var novoDia = document.getElementById('editDia').value;
-        var novoHorario = document.getElementById('editHorario').value;
+        var dataDigitada = document.getElementById('editDia').value;
+        var horarioDigitado = document.getElementById('editHorario').value;
         
         var updateData = {
             rowId: rowId,
@@ -917,26 +1456,28 @@ label {
             whatsapp_cliente: document.getElementById('editWhatsapp').value,
             instagram_cliente: document.getElementById('editInstagram').value,
             compromisso: document.getElementById('editCompromisso').value,
-            dia_da_semana: novoDia,
-            horario: novoHorario,
+            dia_da_semana: dataDigitada ? "'" + dataDigitada : '',
+            horario: horarioDigitado ? "'" + horarioDigitado : '',
             descricao: document.getElementById('editDescricao').value
         };
         
         showGlobalSpinner(true, 'Atualizando...');
-        
         callAPI('update_agenda', { data: JSON.stringify(updateData) }, function(result) {
             showGlobalSpinner(false);
             if (result.success) {
                 closeModal();
-                loadData();
-                showToast('✓ Compromisso atualizado!', 'success');
+                loadAllData();
+                showToast('Compromisso atualizado!', 'success');
             } else {
                 showToast('Erro ao atualizar', 'error');
             }
         });
     }
 
-    // Navegação
+    function closeModal() { 
+        document.getElementById('modal').classList.remove('active'); 
+    }
+
     function switchView(view) {
         document.querySelectorAll('.view-section').forEach(function(s) { s.classList.remove('active'); });
         document.querySelectorAll('.nav-icon').forEach(function(i) { i.classList.remove('active'); });
@@ -951,6 +1492,9 @@ label {
             document.getElementById('solicitacoes-list').style.display = 'block';
             document.getElementById('pagina-recusa').style.display = 'none';
         }
+        if (view === 'disponibilidade') {
+            loadDispo();
+        }
         lucide.createIcons();
     }
     
@@ -960,7 +1504,6 @@ label {
         });
     });
 
-    // Sessão salva
     var saved = localStorage.getItem('professor');
     if (saved) {
         try {
@@ -970,7 +1513,7 @@ label {
                 document.getElementById('teacher-name').innerText = currentProfessor;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('dashboard-screen').classList.remove('hidden');
-                loadData();
+                loadAllData();
             }
         } catch(e) {}
     }
