@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Agenda do Professor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --brand-red: #c20000; }
+        * { font-family: 'Poppins', sans-serif; }
+        
+        body { background-color: #000; color: #fff; margin: 0; min-height: 100vh; }
+        
+        .glass-panel { 
+            background: linear-gradient(145deg, rgba(15,15,15,0.95) 0%, rgba(5,5,5,1) 100%); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-icon {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: #555;
+            border: 1px solid transparent;
+        }
+        .nav-icon:hover { color: #fff; background: rgba(255,255,255,0.08); transform: translateY(-2px); }
+        .nav-icon.active { color: var(--brand-red); background: rgba(194,0,0,0.15); border-color: rgba(194,0,0,0.3); }
+        
+        .card-agenda {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .card-agenda:hover { background: rgba(255,255,255,0.04); border-color: rgba(194,0,0,0.3); transform: translateX(5px); }
+        
+        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+        .spinner-white { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+        .spinner-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10002; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
+        .spinner-large { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.2); border-top: 3px solid var(--brand-red); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.95);
+            border: 1px solid var(--brand-red);
+            padding: 12px 24px;
+            border-radius: 50px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10000;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .toast.show { opacity: 1; bottom: 40px; }
+        .toast.error { border-color: #ff4444; }
+        .toast.success { border-color: #00c851; }
+        
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(8px);
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-content { max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb { background: var(--brand-red); border-radius: 10px; }
+        
+        @media (max-width: 768px) {
+            .modal-content { max-height: 85vh; }
+            .modal-content::-webkit-scrollbar { width: 4px; }
+        }
+        
+        input, select, textarea {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.4rem 0.6rem;
+            color: white;
+            font-size: 0.7rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand-red); background: rgba(255,255,255,0.08); }
+        label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 0.15rem; display: block; }
+        
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .notification-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--brand-red); border-radius: 50%; border: 2px solid #000; display: none; }
+        .notification-dot.visible { display: block; }
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: transparent; }
+        .calendar-day { background: rgba(255,255,255,0.03); aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; position: relative; border-radius: 12px; }
+        .calendar-day:hover:not(.empty) { background: rgba(194,0,0,0.2); color: var(--brand-red); }
+        .calendar-day.active-day { background: rgba(194,0,0,0.3); color: var(--brand-red); font-weight: 700; }
+        .calendar-day.today { color: var(--brand-red); font-weight: 800; border: 1px solid var(--brand-red); }
+        .calendar-day.has-event::after { content: ''; position: absolute; bottom: 6px; width: 5px; height: 5px; background: var(--brand-red); border-radius: 50%; }
+        .calendar-day.empty { background: transparent; cursor: default; }
+        .calendar-day.past { opacity: 0.3; cursor: not-allowed; }
+        
+        @media (max-width: 768px) {
+            .calendar-grid { gap: 2px; }
+            .calendar-day { font-size: 12px; border-radius: 8px; }
+            .desktop-layout { flex-direction: column; }
+            #pending-table thead { display: none; }
+            #pending-table tr { display: block; margin-bottom: 1rem; background: rgba(255,255,255,0.02); border-radius: 20px; padding: 1rem; }
+            #pending-table td { display: block; padding: 0.25rem 0; text-align: left !important; }
+            .toast { white-space: normal; text-align: center; max-width: 90%; }
+        }
+        
+        @media (min-width: 769px) { .desktop-layout { display: flex; gap: 2rem; align-items: flex-start; } .calendar-wrapper { flex: 0 0 400px; } .events-panel { flex: 1; } }
+        
+        .btn-recusar {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-recusar:hover { background: rgba(255,0,0,0.2); color: #ff4444; }
+        
+        .btn-aprovar {
+            background: var(--brand-red);
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-aprovar:hover { transform: scale(1.02); filter: brightness(1.1); }
+        
+        .message-box { 
+            background: rgba(255,255,255,0.03); 
+            border-left: 3px solid var(--brand-red); 
+            padding: 12px; 
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .btn-whatsapp {
+            background: #25D366;
+            transition: all 0.2s ease;
+        }
+        .btn-whatsapp:hover { filter: brightness(1.1); transform: scale(1.02); }
+        
+        .form-group { margin-bottom: 0.5rem; }
+        
+        h3 { font-size: 1rem; margin-bottom: 0.75rem; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen" class="fixed inset-0 bg-black z-50 flex items-center justify-center">
+    <div class="text-center w-full max-w-xs px-6">
+        <div class="mb-8">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#c20000] to-[#8b0000] flex items-center justify-center">
+                <i data-lucide="calendar" class="w-8 h-8 text-white"></i>
+            </div>
+            <p class="text-[#c20000] text-[9px] tracking-[0.6em] uppercase mb-2 font-bold opacity-80">Agenda</p>
+            <h2 class="text-white text-xl font-light">Hello, teacher!</h2>
+        </div>
+        <div class="glass-panel p-1 rounded-2xl mb-4 flex items-center">
+            <input type="password" id="login-senha" placeholder="Digite sua senha" class="bg-transparent border-none text-white px-4 py-3 text-sm w-full focus:ring-0 outline-none">
+            <button id="login-btn" class="bg-[#c20000] text-white p-3 rounded-xl transition-all flex items-center justify-center min-w-[52px]">
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <p class="text-[10px] text-zinc-500">Digite seu pin do windows</p>
+    </div>
+</div>
+
+<div id="dashboard-screen" class="hidden max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10">
+    <header class="flex items-center justify-between mb-8 md:mb-12">
+        <div>
+            <p class="text-[#c20000] text-[8px] md:text-[9px] tracking-[0.6em] uppercase mb-1 font-bold opacity-80">Agenda</p>
+            <h1 class="text-base md:text-lg font-light text-white tracking-tight" id="teacher-name">Carregando...</h1>
+        </div>
+        <div class="flex items-center gap-3 md:gap-4">
+            <button onclick="logout()" class="text-zinc-500 hover:text-[#c20000] transition-all text-[10px] md:text-xs uppercase tracking-wider flex items-center gap-1 md:gap-2">
+                <i data-lucide="log-out" class="w-3 h-3 md:w-4 md:h-4"></i>
+                <span class="hidden md:inline">Sair</span>
+            </button>
+            <nav class="glass-panel p-1 rounded-2xl flex items-center gap-1">
+                <div class="nav-icon active" data-view="home"><i data-lucide="home" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                <div class="nav-icon" data-view="calendar"><i data-lucide="calendar" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                <div class="nav-icon" data-view="messages"><i data-lucide="message-square" class="w-4 h-4 md:w-5 md:h-5"></i><div class="notification-dot" id="pending-dot"></div></div>
+            </nav>
+        </div>
+    </header>
+
+    <section id="view-home" class="view-section active">
+        <div class="flex items-center justify-between mb-6 md:mb-8">
+            <h2 class="text-lg md:text-xl font-light">Próximos compromissos</h2>
+            <span class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest" id="current-date"></span>
+        </div>
+        <div id="agenda-hoje" class="grid gap-3"></div>
+    </section>
+
+    <section id="view-calendar" class="view-section">
+        <h2 class="text-lg md:text-xl font-light mb-6 md:mb-8">Meu <span class="text-[#c20000]">Calendário</span></h2>
+        <div class="desktop-layout">
+            <div class="calendar-wrapper">
+                <div class="flex items-center justify-between mb-4">
+                    <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <span id="calendar-month-year" class="text-sm md:text-base font-medium"></span>
+                    <button onclick="changeMonth(1)" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                </div>
+                <div class="calendar-grid" id="calendar-body">
+                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">DOM</div>
+                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">SEG</div>
+                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">TER</div>
+                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">QUA</div>
+                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">QUI</div>
+                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">SEX</div>
+                    <div class="calendar-day empty text-[10px] text-zinc-600 font-bold">SÁB</div>
+                </div>
+            </div>
+            <div class="events-panel glass-panel rounded-2xl md:rounded-3xl p-5 md:p-6">
+                <h3 class="text-base md:text-lg font-light mb-3 md:mb-4" id="selected-date-title">Selecione uma data</h3>
+                <div id="selected-day-agenda" class="space-y-2 md:space-y-3"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-messages" class="view-section">
+        <h2 class="text-lg md:text-xl font-light mb-6 md:mb-8">Solicitações <span class="text-[#c20000]">Pendentes</span></h2>
+        
+        <div id="solicitacoes-list" class="glass-panel rounded-2xl md:rounded-3xl overflow-hidden">
+            <table class="w-full text-left" id="pending-table">
+                <thead class="text-[9px] md:text-[10px] text-zinc-500 uppercase border-b border-white/5">
+                    <tr><th class="px-4 md:px-6 py-3 md:py-4">Cliente</th><th class="px-4 md:px-6 py-3 md:py-4">Compromisso</th><th class="px-4 md:px-6 py-3 md:py-4">Data/Horário</th><th class="px-4 md:px-6 py-3 md:py-4 text-right">Decisão</th></tr>
+                </thead>
+                <tbody id="pending-list"></tbody>
+            </table>
+        </div>
+        
+        <div id="pagina-recusa" class="glass-panel rounded-2xl md:rounded-3xl p-5 md:p-6" style="display: none;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg md:text-xl font-light">Recusar <span class="text-[#c20000]">Solicitação</span></h2>
+                <button onclick="fecharPaginaRecusa()" class="text-zinc-400 hover:text-white transition-all flex items-center gap-2 text-sm">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar
+                </button>
+            </div>
+            <div id="recusa-conteudo"></div>
+        </div>
+    </section>
+</div>
+
+<div id="modal" class="modal"><div class="modal-content glass-panel rounded-2xl md:rounded-3xl p-4 md:p-5"><div id="modal-body"></div></div></div>
+<div id="toast" class="toast"></div>
+<div id="global-spinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner-large"></div>
+    <p class="text-white text-sm">Processando...</p>
+</div>
+
+<script>
+    var API_URL = 'https://script.google.com/macros/s/AKfycbyQhIwtvmFIjvij-ZwbknM35sj4InU3Bvd_Bi5F4b5YBuankHLk1HDZED-wXh3Kfu_y/exec';
+    var currentProfessor = null;
+    var agendaData = [];
+    var solicitData = [];
+    var currentDate = new Date();
+    var selectedDate = new Date().toISOString().split('T')[0];
+    var weekDays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    var monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    var solicitacaoSelecionada = null;
+
+    function formatarHorario(horario) {
+        if (!horario) return '--:--';
+        if (typeof horario === 'string' && horario.match(/^\d{2}:\d{2}$/)) return horario;
+        if (typeof horario === 'string' && horario.includes('T')) {
+            var hora = horario.substring(11, 13);
+            var minuto = horario.substring(14, 16);
+            if (hora && minuto) return hora + ':' + minuto;
+        }
+        if (typeof horario === 'string' && horario.match(/^\d{2}:\d{2}:\d{2}/)) {
+            return horario.substring(0, 5);
+        }
+        return horario;
+    }
+
+    function formatarData(dataStr) {
+        if (!dataStr) return '';
+        if (dataStr.includes('/')) return dataStr;
+        var partes = dataStr.split('-');
+        if (partes.length === 3) return partes[2] + '/' + partes[1] + '/' + partes[0];
+        return dataStr;
+    }
+    
+    function isDataString(str) {
+        if (!str) return false;
+        var regexData = /^\d{2}\/\d{2}\/\d{4}$/;
+        return regexData.test(str);
+    }
+    
+    function converterDataParaISO(dataStr) {
+        if (!dataStr) return null;
+        var partes = dataStr.split('/');
+        if (partes.length === 3) {
+            return partes[2] + '-' + partes[1] + '-' + partes[0];
+        }
+        return dataStr;
+    }
+
+    function showToast(msg, type) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = 'toast ' + (type || 'error') + ' show';
+        setTimeout(function() { toast.classList.remove('show'); }, 3000);
+    }
+
+    function showGlobalSpinner(show, message) {
+        var spinner = document.getElementById('global-spinner');
+        if (show) {
+            if (message) spinner.querySelector('p').textContent = message;
+            spinner.style.display = 'flex';
+        } else {
+            spinner.style.display = 'none';
+        }
+    }
+
+    function callAPI(action, params, callback, showLoader) {
+        if (showLoader !== false) showGlobalSpinner(true, 'Conectando...');
+        
+        var callbackName = 'cb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+        var script = document.createElement('script');
+        
+        window[callbackName] = function(response) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            if (showLoader !== false) showGlobalSpinner(false);
+            callback(response);
+        };
+        
+        var url = API_URL + '?action=' + action + '&callback=' + callbackName;
+        for (var key in params) {
+            url += '&' + key + '=' + encodeURIComponent(params[key]);
+        }
+        
+        script.src = url;
+        script.onerror = function() {
+            delete window[callbackName];
+            if (showLoader !== false) showGlobalSpinner(false);
+            callback({ success: false, message: 'Erro de conexao' });
+        };
+        
+        setTimeout(function() {
+            if (window[callbackName]) {
+                delete window[callbackName];
+                if (showLoader !== false) showGlobalSpinner(false);
+                callback({ success: false, message: 'Timeout' });
+            }
+        }, 15000);
+        
+        document.body.appendChild(script);
+    }
+
+    function fazerLogin() {
+        var senha = document.getElementById('login-senha').value.trim();
+        if (!senha) { showToast('Digite sua senha'); return; }
+        
+        var btn = document.getElementById('login-btn');
+        btn.innerHTML = '<div class="spinner-white"></div>';
+        btn.disabled = true;
+        
+        callAPI('login', { token: senha }, function(result) {
+            btn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5"></i>';
+            btn.disabled = false;
+            lucide.createIcons();
+            
+            if (result && result.success && result.professor) {
+                currentProfessor = result.professor;
+                localStorage.setItem('professor', JSON.stringify({ nome: currentProfessor, token: senha, timestamp: Date.now() }));
+                document.getElementById('teacher-name').innerText = currentProfessor;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard-screen').classList.remove('hidden');
+                loadData();
+                showToast('Bem-vindo, ' + currentProfessor + '!', 'success');
+            } else {
+                showToast(result?.message || 'Senha invalida');
+            }
+        }, false);
+    }
+
+    function logout() {
+        localStorage.removeItem('professor');
+        currentProfessor = null;
+        document.getElementById('dashboard-screen').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+        document.getElementById('login-senha').value = '';
+    }
+
+    function loadData() {
+        showGlobalSpinner(true, 'Carregando agenda...');
+        
+        callAPI('get_data', { professor: currentProfessor }, function(result) {
+            if (result.success && result.agenda && result.agenda.length > 0) {
+                agendaData = result.agenda || [];
+                solicitData = result.solicit || [];
+            } else {
+                agendaData = [];
+                solicitData = [];
+                showToast('Nenhum dado encontrado na API', 'error');
+            }
+            
+            renderAll();
+            showGlobalSpinner(false);
+        });
+    }
+
+    function renderAll() {
+        renderAgendaHoje();
+        renderPending();
+        renderCalendar();
+        updateSelectedDayEvents();
+        var dot = document.getElementById('pending-dot');
+        if (solicitData.length > 0) dot.classList.add('visible');
+        else dot.classList.remove('visible');
+        lucide.createIcons();
+    }
+
+    function renderAgendaHoje() {
+        var hoje = new Date();
+        var hojeStr = hoje.toISOString().split('T')[0];
+        var hojeWeekday = weekDays[hoje.getDay()];
+        
+        var events = [];
+        for (var i = 0; i < agendaData.length; i++) {
+            var e = agendaData[i];
+            if (e.status === 'Cancelado') continue;
+            
+            var match = false;
+            if (e.dia_da_semana && isDataString(e.dia_da_semana)) {
+                var dataISO = converterDataParaISO(e.dia_da_semana);
+                if (dataISO === hojeStr) match = true;
+            }
+            else if (e.dia_da_semana && e.dia_da_semana === hojeWeekday) {
+                match = true;
+            }
+            
+            if (match) events.push(e);
+        }
+        
+        events.sort(function(a, b) {
+            return formatarHorario(a.horario).localeCompare(formatarHorario(b.horario));
+        });
+        
+        document.getElementById('current-date').innerHTML = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+        var container = document.getElementById('agenda-hoje');
+        
+        if (events.length === 0) {
+            container.innerHTML = '<div class="glass-panel p-6 md:p-8 text-center rounded-xl md:rounded-2xl"><p class="text-zinc-500 text-sm">Nenhum compromisso para hoje</p></div>';
+            return;
+        }
+        
+        var html = '';
+        for (var i = 0; i < events.length; i++) {
+            var e = events[i];
+            html += '<div class="card-agenda p-4 md:p-5 rounded-xl md:rounded-2xl">' +
+                '<div class="flex justify-between items-center">' +
+                    '<div class="flex items-center gap-4">' +
+                        '<div class="text-xl md:text-2xl font-bold text-[#c20000] w-20">' + formatarHorario(e.horario) + '</div>' +
+                        '<div>' +
+                            '<h3 class="font-semibold text-white text-base md:text-lg">' + (e.cliente || '---') + '</h3>' +
+                            '<p class="text-xs text-zinc-400">' + (e.compromisso || 'Aula') + (e.descricao ? ' • ' + e.descricao : '') + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+        container.innerHTML = html;
+        lucide.createIcons();
+    }
+
+    function renderPending() {
+        var tbody = document.getElementById('pending-list');
+        if (!solicitData.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 md:py-12 text-zinc-500 text-sm">Nenhuma solicitação pendente</td></td>';
+            return;
+        }
+        
+        var html = '';
+        for (var i = 0; i < solicitData.length; i++) {
+            var s = solicitData[i];
+            var dataExibicao = s.dia_da_semana || '-';
+            html += '<tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors">' +
+                '<td class="px-4 md:px-6 py-3 md:py-4">' +
+                    '<p class="text-sm md:text-base font-medium">' + (s.cliente || '---') + '</p>' +
+                    (s.whatsapp_cliente ? '<p class="text-[9px] md:text-[10px] text-zinc-500 mt-1">📱 ' + s.whatsapp_cliente + '</p>' : '') +
+                '</td>' +
+                '<td class="px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm text-zinc-400">' + (s.compromisso || '---') + '</td>' +
+                '<td class="px-4 md:px-6 py-3 md:py-4">' +
+                    '<span class="text-xs md:text-sm">' + dataExibicao + '</span><br>' +
+                    '<span class="text-[11px] md:text-xs text-[#c20000] font-semibold">' + formatarHorario(s.horario) + '</span>' +
+                '</td>' +
+                '<td class="px-4 md:px-6 py-3 md:py-4 text-right">' +
+                    '<div class="flex gap-2 justify-end">' +
+                        '<button onclick="abrirPaginaRecusa(' + s.rowId + ')" class="btn-recusar flex items-center gap-1"><i data-lucide="x" class="w-3 h-3"></i> Recusar</button>' +
+                        '<button onclick="openApproveModal(' + s.rowId + ')" class="btn-aprovar flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Aprovar</button>' +
+                    '</div>' +
+                '</td>' +
+            '</tr>';
+        }
+        tbody.innerHTML = html;
+        lucide.createIcons();
+    }
+
+    // ==================== RECUSAR SOLICITAÇÃO ====================
+    
+    function abrirPaginaRecusa(rowId) {
+        for (var i = 0; i < solicitData.length; i++) {
+            if (solicitData[i].rowId == rowId) {
+                solicitacaoSelecionada = solicitData[i];
+                break;
+            }
+        }
+        
+        if (!solicitacaoSelecionada) {
+            showToast('Erro: solicitação não encontrada', 'error');
+            return;
+        }
+        
+        var numeroWhatsApp = solicitacaoSelecionada.whatsapp_cliente || "";
+        numeroWhatsApp = String(numeroWhatsApp);
+        
+        var mensagem = 'Hi ' + solicitacaoSelecionada.cliente + '! Recebi sua solicitação de ' + solicitacaoSelecionada.compromisso + ', mas infelizmente o horário solicitado não está disponível. Podemos reagendar manualmente por aqui? Obrigada pela paciência. Um abraço da teacher.';
+        
+        var whatsappLink = '';
+        if (numeroWhatsApp && numeroWhatsApp !== '') {
+            var numeroLimpo = numeroWhatsApp.replace(/\D/g, '');
+            if (numeroLimpo) {
+                whatsappLink = 'https://wa.me/55' + numeroLimpo;
+            }
+        }
+        
+        var container = document.getElementById('recusa-conteudo');
+        container.innerHTML = `
+            <div class="mb-4">
+                <p class="text-zinc-400 text-xs uppercase tracking-wider mb-1">Cliente</p>
+                <p class="text-white text-base font-medium">${solicitacaoSelecionada.cliente}</p>
+            </div>
+            <div class="mb-4">
+                <p class="text-zinc-400 text-xs uppercase tracking-wider mb-1">Compromisso</p>
+                <p class="text-white text-sm">${solicitacaoSelecionada.compromisso} • ${solicitacaoSelecionada.dia_da_semana || '-'} às ${formatarHorario(solicitacaoSelecionada.horario)}</p>
+            </div>
+            <div class="mb-4">
+                <p class="text-zinc-400 text-xs uppercase tracking-wider mb-2">Mensagem para o aluno</p>
+                <div class="message-box text-sm">${mensagem}</div>
+            </div>
+            <div class="flex gap-3 mb-4">
+                <button onclick="copiarMensagemRecusa()" class="flex-1 bg-white/10 py-2 rounded-lg text-sm hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="copy" class="w-3 h-3"></i> Copiar
+                </button>
+                ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" class="flex-1 btn-whatsapp text-center py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp
+                </a>` : '<button disabled class="flex-1 bg-gray-600 py-2 rounded-lg text-sm cursor-not-allowed flex items-center justify-center gap-2"><i data-lucide="alert-circle" class="w-3 h-3"></i> Sem WhatsApp</button>'}
+            </div>
+            <div class="border-t border-white/10 pt-3">
+                <p class="text-xs text-zinc-500 mb-2">Após enviar a mensagem, confirme a recusa:</p>
+                <button onclick="confirmarRecusa()" class="w-full bg-red-600/20 hover:bg-red-600/30 py-2 rounded-lg text-sm text-red-400 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="x-circle" class="w-3 h-3"></i> Confirmar Recusa
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('solicitacoes-list').style.display = 'none';
+        document.getElementById('pagina-recusa').style.display = 'block';
+        lucide.createIcons();
+    }
+    
+    function copiarMensagemRecusa() {
+        var msgDiv = document.querySelector('#recusa-conteudo .message-box');
+        if (msgDiv) {
+            var textarea = document.createElement('textarea');
+            textarea.value = msgDiv.innerText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('Mensagem copiada!', 'success');
+        }
+    }
+    
+    function fecharPaginaRecusa() {
+        document.getElementById('solicitacoes-list').style.display = 'block';
+        document.getElementById('pagina-recusa').style.display = 'none';
+        solicitacaoSelecionada = null;
+    }
+    
+    function confirmarRecusa() {
+        if (!solicitacaoSelecionada) return;
+        
+        showGlobalSpinner(true, 'Processando...');
+        
+        callAPI('update_status', { id: solicitacaoSelecionada.rowId, status: 'Recusado' }, function(statusResult) {
+            showGlobalSpinner(false);
+            if (statusResult.success) {
+                fecharPaginaRecusa();
+                loadData();
+                showToast('Solicitação recusada!', 'success');
+            } else {
+                showToast('Erro ao recusar', 'error');
+            }
+        });
+    }
+
+    // ==================== APROVAR SOLICITAÇÃO ====================
+    
+    function openApproveModal(rowId) {
+        var req = null;
+        for (var i = 0; i < solicitData.length; i++) {
+            if (solicitData[i].rowId == rowId) {
+                req = solicitData[i];
+                break;
+            }
+        }
+        if (!req) return;
+        
+        // CORREÇÃO: Formata o horário para apenas HH:MM
+        var horarioExibicao = req.horario || "";
+        if (horarioExibicao && typeof horarioExibicao === 'string') {
+            if (horarioExibicao.match(/^\d{2}:\d{2}:/)) {
+                horarioExibicao = horarioExibicao.substring(0, 5);
+            } else if (horarioExibicao.includes('T')) {
+                var match = horarioExibicao.match(/(\d{2}):(\d{2}):/);
+                if (match) {
+                    horarioExibicao = match[1] + ':' + match[2];
+                }
+            }
+        }
+        
+        var modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = 
+            '<h3 class="font-light mb-3">✓ Aprovar Solicitação</h3>' +
+            '<div class="mb-3 p-2 bg-white/5 rounded-lg"><p class="text-xs text-zinc-400">Solicitação de <span class="text-white font-medium">' + (req.cliente || '') + '</span></p></div>' +
+            '<form onsubmit="submitApprove(event, ' + rowId + ')">' +
+                '<div class="form-group"><label>Cliente</label><input type="text" id="appCliente" value="' + (req.cliente || '') + '" required></div>' +
+                '<div class="form-group"><label>WhatsApp</label><input type="text" id="appWhatsapp" value="' + (req.whatsapp_cliente || '') + '"></div>' +
+                '<div class="form-group"><label>Instagram</label><input type="text" id="appInstagram" value="' + (req.instagram_cliente || '') + '"></div>' +
+                '<div class="form-group"><label>Tipo</label><select id="appCompromisso" required>' +
+                    '<option value="Aula"' + (req.compromisso === 'Aula' ? ' selected' : '') + '>Aula Regular</option>' +
+                    '<option value="Aula extra"' + (req.compromisso === 'Aula extra' ? ' selected' : '') + '>Aula Extra</option>' +
+                    '<option value="Conversa Informal"' + (req.compromisso === 'Conversa Informal' ? ' selected' : '') + '>Conversa Informal</option>' +
+                '</select></div>' +
+                '<div class="form-group"><label>Data (DD/MM/AAAA ou dia da semana)</label><input type="text" id="appData" value="' + (req.dia_da_semana || '') + '" required></div>' +
+                '<div class="form-group"><label>Horário</label><input type="text" id="appHorario" value="' + horarioExibicao + '" placeholder="Ex: 14:30" required></div>' +
+                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">✓ Aprovar</button></div>' +
+            '</form>';
+        
+        document.getElementById('modal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    function submitApprove(event, rowId) {
+        event.preventDefault();
+        
+        var newEvent = {
+            professor: currentProfessor,
+            cliente: document.getElementById('appCliente').value,
+            whatsapp_cliente: document.getElementById('appWhatsapp').value,
+            instagram_cliente: document.getElementById('appInstagram').value,
+            compromisso: document.getElementById('appCompromisso').value,
+            dia_da_semana: document.getElementById('appData').value,
+            horario: document.getElementById('appHorario').value,
+            cupom: ""
+        };
+        
+        console.log("Enviando para API:", newEvent);
+        
+        showGlobalSpinner(true, 'Aprovando...');
+        
+        callAPI('add_to_agenda', { data: JSON.stringify(newEvent) }, function(result) {
+            if (result.success) {
+                callAPI('update_status', { id: rowId, status: 'Aprovado' }, function(statusResult) {
+                    showGlobalSpinner(false);
+                    closeModal();
+                    loadData();
+                    showToast('✓ Solicitação aprovada!', 'success');
+                });
+            } else {
+                showGlobalSpinner(false);
+                showToast('Erro ao aprovar', 'error');
+            }
+        });
+    }
+
+    // ==================== CALENDÁRIO ====================
+    
+    function renderCalendar() {
+        var year = currentDate.getFullYear(), month = currentDate.getMonth();
+        document.getElementById('calendar-month-year').innerHTML = monthNames[month] + ' ' + year;
+        
+        var firstDay = new Date(year, month, 1).getDay();
+        var daysInMonth = new Date(year, month + 1, 0).getDate();
+        var container = document.getElementById('calendar-body');
+        var headers = Array.from(container.children).slice(0, 7);
+        container.innerHTML = '';
+        for (var h = 0; h < headers.length; h++) {
+            container.appendChild(headers[h]);
+        }
+        
+        var hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        
+        for (var i = 0; i < firstDay; i++) { 
+            var d = document.createElement('div'); 
+            d.className = 'calendar-day empty'; 
+            container.appendChild(d); 
+        }
+        
+        for (var d = 1; d <= daysInMonth; d++) {
+            var dayEl = document.createElement('div');
+            var dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+            var dataAtual = new Date(year, month, d);
+            
+            dayEl.className = 'calendar-day';
+            dayEl.innerText = d;
+            
+            if (dataAtual < hoje) dayEl.classList.add('past');
+            
+            var hasEvent = false;
+            for (var e = 0; e < agendaData.length; e++) {
+                var item = agendaData[e];
+                if (item.status === 'Cancelado') continue;
+                
+                if (item.dia_da_semana && isDataString(item.dia_da_semana)) {
+                    var dataISO = converterDataParaISO(item.dia_da_semana);
+                    if (dataISO === dateStr) { hasEvent = true; break; }
+                }
+                else if (item.dia_da_semana && item.dia_da_semana === weekDays[dataAtual.getDay()]) {
+                    hasEvent = true;
+                    break;
+                }
+            }
+            if (hasEvent && dataAtual >= hoje) dayEl.classList.add('has-event');
+            
+            if (d === hoje.getDate() && month === hoje.getMonth() && year === hoje.getFullYear()) dayEl.classList.add('today');
+            if (dateStr === selectedDate) dayEl.classList.add('active-day');
+            
+            dayEl.onclick = (function(date, dataObj) {
+                return function() {
+                    if (dataObj < hoje) { showToast('Não é possível selecionar datas passadas', 'error'); return; }
+                    var days = document.querySelectorAll('.calendar-day');
+                    for (var i = 0; i < days.length; i++) {
+                        days[i].classList.remove('active-day');
+                    }
+                    this.classList.add('active-day');
+                    selectedDate = date;
+                    updateSelectedDayEvents();
+                };
+            })(dateStr, dataAtual);
+            
+            container.appendChild(dayEl);
+        }
+    }
+
+    function updateSelectedDayEvents() {
+        if (!selectedDate) {
+            document.getElementById('selected-date-title').innerHTML = 'Selecione uma data';
+            document.getElementById('selected-day-agenda').innerHTML = '<div class="text-center text-zinc-500 py-8 text-sm">Clique em um dia no calendário</div>';
+            return;
+        }
+        
+        var parts = selectedDate.split('-');
+        var year = parts[0], month = parts[1], day = parts[2];
+        var dateObj = new Date(year, month-1, day);
+        document.getElementById('selected-date-title').innerHTML = '<i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i> ' + dateObj.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        var events = [];
+        for (var i = 0; i < agendaData.length; i++) {
+            var e = agendaData[i];
+            if (e.status === 'Cancelado') continue;
+            
+            if (e.dia_da_semana && isDataString(e.dia_da_semana)) {
+                var dataISO = converterDataParaISO(e.dia_da_semana);
+                if (dataISO === selectedDate) events.push(e);
+            }
+            else if (e.dia_da_semana && e.dia_da_semana === weekDays[dateObj.getDay()]) {
+                events.push(e);
+            }
+        }
+        
+        var container = document.getElementById('selected-day-agenda');
+        
+        if (!events.length) {
+            container.innerHTML = '<div class="text-center text-zinc-500 py-8 text-sm">Nenhum compromisso agendado para esta data</div>';
+            return;
+        }
+        
+        var html = '';
+        for (var i = 0; i < events.length; i++) {
+            var e = events[i];
+            html += '<div class="card-agenda p-3 md:p-4 rounded-xl" onclick="openEditEventModal(' + (e.rowId) + ')">' +
+                '<div class="flex justify-between items-center">' +
+                    '<div>' +
+                        '<p class="text-sm md:text-base font-medium">' + e.cliente + '</p>' +
+                        '<p class="text-[10px] md:text-xs text-zinc-500">' + (e.compromisso || 'Aula') + ' • ' + formatarHorario(e.horario) + '</p>' +
+                    '</div>' +
+                    '<i data-lucide="edit-2" class="w-4 h-4 text-zinc-500"></i>' +
+                '</div>' +
+            '</div>';
+        }
+        container.innerHTML = html;
+        lucide.createIcons();
+    }
+
+    function changeMonth(delta) {
+        currentDate.setMonth(currentDate.getMonth() + delta);
+        renderCalendar();
+        updateSelectedDayEvents();
+    }
+
+    function closeModal() { 
+        document.getElementById('modal').classList.remove('active'); 
+    }
+
+    function openEditEventModal(rowId) {
+        var evento = null;
+        for (var i = 0; i < agendaData.length; i++) {
+            if (agendaData[i].rowId == rowId) {
+                evento = agendaData[i];
+                break;
+            }
+        }
+        if (!evento) return;
+        
+        var horarioAtual = formatarHorario(evento.horario);
+        
+        var modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = 
+            '<h3 class="font-light mb-3">✎ Editar Compromisso</h3>' +
+            '<form onsubmit="submitEdit(event, ' + rowId + ')">' +
+                '<div class="form-group"><label>Cliente</label><input type="text" id="editCliente" value="' + (evento.cliente || '') + '" required></div>' +
+                '<div class="form-group"><label>WhatsApp</label><input type="text" id="editWhatsapp" value="' + (evento.whatsapp_cliente || '') + '"></div>' +
+                '<div class="form-group"><label>Instagram</label><input type="text" id="editInstagram" value="' + (evento.instagram_cliente || '') + '"></div>' +
+                '<div class="form-group"><label>Tipo</label><select id="editCompromisso" required>' +
+                    '<option value="Aula"' + (evento.compromisso === 'Aula' ? ' selected' : '') + '>Aula Regular</option>' +
+                    '<option value="Aula extra"' + (evento.compromisso === 'Aula extra' ? ' selected' : '') + '>Aula Extra</option>' +
+                    '<option value="Conversa Informal"' + (evento.compromisso === 'Conversa Informal' ? ' selected' : '') + '>Conversa Informal</option>' +
+                '</select></div>' +
+                '<div class="form-group"><label>Dia (DD/MM/AAAA ou dia da semana)</label><input type="text" id="editDia" value="' + (evento.dia_da_semana || '') + '" required></div>' +
+                '<div class="form-group"><label>Horário (Ex: 14:30)</label><input type="text" id="editHorario" value="' + horarioAtual + '" placeholder="Ex: 14:30" required></div>' +
+                '<div class="form-group"><label>Descrição</label><textarea id="editDescricao" rows="2">' + (evento.descricao || '') + '</textarea></div>' +
+                '<div class="flex gap-2 mt-3"><button type="button" onclick="closeModal()" class="flex-1 bg-white/5 py-1.5 rounded-lg text-xs">Cancelar</button><button type="submit" class="flex-1 bg-[#c20000] py-1.5 rounded-lg text-xs font-bold">💾 Salvar</button></div>' +
+            '</form>';
+        
+        document.getElementById('modal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    function submitEdit(event, rowId) {
+        event.preventDefault();
+        
+        var novoDia = document.getElementById('editDia').value;
+        var novoHorario = document.getElementById('editHorario').value;
+        
+        var updateData = {
+            rowId: rowId,
+            cliente: document.getElementById('editCliente').value,
+            whatsapp_cliente: document.getElementById('editWhatsapp').value,
+            instagram_cliente: document.getElementById('editInstagram').value,
+            compromisso: document.getElementById('editCompromisso').value,
+            dia_da_semana: novoDia,
+            horario: novoHorario,
+            descricao: document.getElementById('editDescricao').value
+        };
+        
+        showGlobalSpinner(true, 'Atualizando...');
+        
+        callAPI('update_agenda', { data: JSON.stringify(updateData) }, function(result) {
+            showGlobalSpinner(false);
+            if (result.success) {
+                closeModal();
+                loadData();
+                showToast('✓ Compromisso atualizado!', 'success');
+            } else {
+                showToast('Erro ao atualizar', 'error');
+            }
+        });
+    }
+
+    // Navegação
+    function switchView(view) {
+        document.querySelectorAll('.view-section').forEach(function(s) { s.classList.remove('active'); });
+        document.querySelectorAll('.nav-icon').forEach(function(i) { i.classList.remove('active'); });
+        document.getElementById('view-' + view).classList.add('active');
+        document.querySelector('.nav-icon[data-view="' + view + '"]').classList.add('active');
+        
+        if (view === 'calendar') {
+            renderCalendar();
+            updateSelectedDayEvents();
+        }
+        if (view === 'messages') {
+            document.getElementById('solicitacoes-list').style.display = 'block';
+            document.getElementById('pagina-recusa').style.display = 'none';
+        }
+        lucide.createIcons();
+    }
+    
+    document.querySelectorAll('.nav-icon').forEach(function(icon) {
+        icon.addEventListener('click', function() {
+            switchView(this.getAttribute('data-view'));
+        });
+    });
+
+    // Sessão salva
+    var saved = localStorage.getItem('professor');
+    if (saved) {
+        try {
+            var data = JSON.parse(saved);
+            if (Date.now() - data.timestamp < 86400000) {
+                currentProfessor = data.nome;
+                document.getElementById('teacher-name').innerText = currentProfessor;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard-screen').classList.remove('hidden');
+                loadData();
+            }
+        } catch(e) {}
+    }
+
+    document.getElementById('login-btn').addEventListener('click', fazerLogin);
+    document.getElementById('login-senha').addEventListener('keypress', function(e) { if (e.key === 'Enter') fazerLogin(); });
+    lucide.createIcons();
+</script>
+</body>
+</html>
