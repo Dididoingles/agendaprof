@@ -95,15 +95,46 @@
         }
         
         input, select, textarea {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 0.4rem 0.6rem;
-            color: white;
-            font-size: 0.7rem;
-            width: 100%;
-            transition: all 0.2s ease;
-        }
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    color: white;
+    font-size: 0.7rem;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+select {
+    background: rgba(15,15,15,0.95);
+    color: white;
+    cursor: pointer;
+}
+
+select option {
+    background: #1a1a1a;
+    color: white;
+    padding: 8px;
+}
+
+select option:hover {
+    background: var(--brand-red);
+}
+
+input:focus, select:focus, textarea:focus { 
+    outline: none; 
+    border-color: var(--brand-red); 
+    background: rgba(255,255,255,0.08); 
+}
+
+label { 
+    font-size: 0.55rem; 
+    text-transform: uppercase; 
+    letter-spacing: 0.1em; 
+    color: #888; 
+    margin-bottom: 0.15rem; 
+    display: block; 
+}
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand-red); background: rgba(255,255,255,0.08); }
         label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 0.15rem; display: block; }
         
