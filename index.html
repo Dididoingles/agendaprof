@@ -86,14 +86,106 @@
         .modal.active { opacity: 1; visibility: visible; }
         .modal-content { max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
         
-        .modal-content::-webkit-scrollbar { width: 6px; }
-        .modal-content::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .modal-content::-webkit-scrollbar-thumb { background: var(--brand-red); border-radius: 10px; }
-        
-        @media (max-width: 768px) {
-            .modal-content { max-height: 85vh; }
-            .modal-content::-webkit-scrollbar { width: 4px; }
-        }
+        /* ===== BARRAS DE ROLAGEM PERSONALIZADAS ===== */
+
+/* Para Webkit (Chrome, Safari, Edge, Opera) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--brand-red) 0%, #8b0000 100%);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #ff0000 0%, var(--brand-red) 100%);
+    transform: scale(1.02);
+}
+
+/* Scrollbar para o modal (já existente, mas melhorada) */
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--brand-red) 0%, #8b0000 100%);
+    border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #ff0000 0%, var(--brand-red) 100%);
+}
+
+/* Scrollbar para a tabela de disponibilidade */
+.responsive-table::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+}
+
+.responsive-table::-webkit-scrollbar-track,
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.responsive-table::-webkit-scrollbar-thumb,
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--brand-red) 0%, #8b0000 100%);
+    border-radius: 10px;
+}
+
+/* Scrollbar para o body (geral) */
+body::-webkit-scrollbar {
+    width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+    background: #0a0a0a;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--brand-red) 0%, #8b0000 100%);
+    border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #ff0000 0%, var(--brand-red) 100%);
+}
+
+/* Para Firefox (suporte cross-browser) */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-red) rgba(255, 255, 255, 0.05);
+}
+
+/* Scrollbar para dispositivos móveis (um pouco mais grossa para facilitar toque) */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    body::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .modal-content::-webkit-scrollbar {
+        width: 4px;
+    }
+}
         
         input, select, textarea {
             background: rgba(255,255,255,0.05);
@@ -199,13 +291,94 @@
             font-weight: 500;
         }
         
-        @media (max-width: 768px) {
-            .calendar-grid { gap: 2px; }
+        /* ===== MELHORIAS DE RESPONSIVIDADE ===== */
+        
+        /* Telas muito pequenas (celulares pequenos) */
+        @media (max-width: 480px) {
+            /* Redução geral de fontes */
+            body { font-size: 13px; }
+            
+            /* Header mais compacto */
+            header { margin-bottom: 1rem !important; }
+            header h1 { font-size: 0.9rem !important; }
+            header p { font-size: 7px !important; }
+            
+            /* Navbar menor */
+            .nav-icon { width: 36px; height: 36px; }
+            .nav-icon i { width: 16px !important; height: 16px !important; }
+            
+            /* Títulos menores */
+            h2 { font-size: 1.1rem !important; margin-bottom: 1rem !important; }
+            
+            /* Cards mais compactos */
+            .card-agenda { padding: 0.75rem !important; }
+            .card-agenda .text-xl { font-size: 1rem !important; width: auto !important; }
+            .card-agenda h3 { font-size: 0.85rem !important; }
+            .card-agenda p { font-size: 0.7rem !important; }
+            
+            /* Botões de ação menores */
+            .action-btn { padding: 4px !important; }
+            .action-btn i { width: 14px !important; height: 14px !important; }
+            
+            /* Calendário ajustado */
+            .calendar-wrapper { max-width: 100%; }
+            .calendar-day { font-size: 10px; border-radius: 5px; }
+            .calendar-nav span { font-size: 11px; }
+            .calendar-nav button { width: 24px; height: 24px; }
+            
+            /* Tabela de disponibilidade */
+            .responsive-table { overflow-x: auto; }
+            table { font-size: 0.7rem; }
+            th, td { padding: 0.5rem !important; }
+            .weekday-tag { font-size: 0.6rem; padding: 2px 8px; }
+            
+            /* Modais ocupam mais espaço */
+            .modal-content { max-width: 95%; padding: 1rem !important; }
+            .modal-content h3 { font-size: 0.9rem !important; }
+            
+            /* Toast adaptado */
+            .toast { white-space: normal; text-align: center; max-width: 90%; font-size: 11px; padding: 10px 16px; }
+            
+            /* Botões de solicitação menores */
+            .btn-recusar, .btn-aprovar { padding: 4px 8px; font-size: 9px; }
+            
+            /* Painel de eventos */
+            .events-panel { padding: 1rem !important; }
+            .events-panel h3 { font-size: 0.9rem !important; }
+        }
+        
+        /* Telas extremamente pequenas (320px) */
+        @media (max-width: 380px) {
+            .nav-icon { width: 32px; height: 32px; }
+            .nav-icon i { width: 14px !important; height: 14px !important; }
+            
+            .glass-panel .flex { gap: 0.5rem !important; }
+            
+            .card-agenda .flex { flex-direction: column; align-items: flex-start !important; gap: 0.5rem; }
+            .action-buttons { align-self: flex-end; }
+            
+            .calendar-day { font-size: 9px; }
+            .calendar-nav span { font-size: 10px; }
+            
+            th, td { font-size: 0.65rem; padding: 0.4rem !important; }
+            
+            .modal-content { padding: 0.75rem !important; }
+            .form-group { margin-bottom: 0.35rem; }
+            input, select, textarea { font-size: 0.65rem; padding: 0.3rem 0.5rem; }
+            label { font-size: 0.5rem; }
+        }
+        
+        /* Tablet landscape e telas médias */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .calendar-wrapper { max-width: 100%; }
             .calendar-day { font-size: 11px; border-radius: 6px; }
             .desktop-layout { flex-direction: column; }
-            .calendar-wrapper { max-width: 100%; }
             .responsive-table { overflow-x: auto; }
             .toast { white-space: normal; text-align: center; max-width: 90%; }
+            
+            /* Ajustes intermediários */
+            .card-agenda .text-xl { font-size: 1.1rem; width: 70px; }
+            h2 { font-size: 1.2rem; }
         }
         
         @media (min-width: 769px) { 
@@ -377,7 +550,7 @@
         </div>
         <div class="glass-panel rounded-2xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table>
+                <table class="w-full">
                     <thead>
                         <tr><th>Dia da Semana</th><th>Horário Inicial</th><th>Horário Final</th><th style="width: 80px">Ações</th></tr>
                     </thead>
@@ -920,7 +1093,7 @@
     function renderDispo() {
         var tbody = document.getElementById('dispo-list');
         if (!dispoData.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-zinc-500">Nenhum horário cadastrado</td><tr><td colspan="4" class="text-center py-2 text-zinc-600 text-xs">Clique em "Novo Range" para adicionar</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-zinc-500">Nenhum horário cadastrado</td></tr><tr><td colspan="4" class="text-center py-2 text-zinc-600 text-xs">Clique em "Novo Range" para adicionar</td></tr>';
             return;
         }
         
